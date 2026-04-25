@@ -17,9 +17,11 @@ export default function AnalyticsPage() {
 
 function AnalyticsContent() {
   const { workoutLogs } = useApp();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [range, setRange] = useState<'4w' | '8w' | '12w' | '6m' | 'all'>('8w');
   const [discipline, setDiscipline] = useState<'all' | 'swimming' | 'cycling' | 'running'>('all');
+
+  const locale = language === 'fr' ? 'fr-FR' : language === 'nl' ? 'nl-NL' : 'en-US';
 
   const cutoffDate = useMemo(() => {
     const d = new Date();
@@ -46,11 +48,11 @@ function AnalyticsContent() {
       const day = d.getDay();
       const monday = new Date(d);
       monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
-      const key = monday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const key = monday.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
       weeks[key] = (weeks[key] || 0) + l.duration;
     });
     return Object.entries(weeks).map(([label, mins]) => ({ label, value: Math.round(mins / 60 * 10) / 10 }));
-  }, [filtered]);
+  }, [filtered, locale]);
 
   // Running pace over time
   const runPaceData = useMemo(() =>
@@ -58,10 +60,10 @@ function AnalyticsContent() {
       .filter(l => l.discipline === 'running' && l.date >= cutoffDate && l.averagePace && l.averagePace > 0 && l.averagePace < 15)
       .sort((a, b) => a.date.localeCompare(b.date))
       .map(l => ({
-        label: new Date(l.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        label: new Date(l.date + 'T00:00:00').toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
         value: Number(l.averagePace!.toFixed(1)),
       })),
-    [workoutLogs, cutoffDate]
+    [workoutLogs, cutoffDate, locale]
   );
 
   // Cycling power over time
@@ -70,10 +72,10 @@ function AnalyticsContent() {
       .filter(l => l.discipline === 'cycling' && l.date >= cutoffDate && l.averagePower && l.averagePower > 0)
       .sort((a, b) => a.date.localeCompare(b.date))
       .map(l => ({
-        label: new Date(l.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        label: new Date(l.date + 'T00:00:00').toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
         value: l.averagePower!,
       })),
-    [workoutLogs, cutoffDate]
+    [workoutLogs, cutoffDate, locale]
   );
 
   // Swim distance over time
@@ -82,10 +84,10 @@ function AnalyticsContent() {
       .filter(l => l.discipline === 'swimming' && l.date >= cutoffDate && l.distance > 0)
       .sort((a, b) => a.date.localeCompare(b.date))
       .map(l => ({
-        label: new Date(l.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        label: new Date(l.date + 'T00:00:00').toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
         value: l.distance,
       })),
-    [workoutLogs, cutoffDate]
+    [workoutLogs, cutoffDate, locale]
   );
 
   // Discipline distribution
@@ -93,23 +95,28 @@ function AnalyticsContent() {
     const counts = { swimming: 0, cycling: 0, running: 0 };
     filtered.forEach(l => { counts[l.discipline] += l.duration; });
     return [
-      { label: 'Swim', value: counts.swimming, color: '#3B82F6' },
-      { label: 'Bike', value: counts.cycling, color: '#10B981' },
-      { label: 'Run', value: counts.running, color: '#F97316' },
+      { label: t.common.disciplines.swimming, value: counts.swimming, color: '#3B82F6' },
+      { label: t.common.disciplines.cycling, value: counts.cycling, color: '#10B981' },
+      { label: t.common.disciplines.running, value: counts.running, color: '#F97316' },
     ].filter(d => d.value > 0);
-  }, [filtered]);
+  }, [filtered, t]);
 
-  // Intensity distribution
+  // Intensity distribution (by perceived effort)
   const effortData = useMemo(() => {
-    const buckets = { Easy: 0, Moderate: 0, Hard: 0, Max: 0 };
+    const buckets = [0, 0, 0, 0];
     filtered.forEach(l => {
-      if (l.perceivedEffort <= 3) buckets.Easy++;
-      else if (l.perceivedEffort <= 5) buckets.Moderate++;
-      else if (l.perceivedEffort <= 8) buckets.Hard++;
-      else buckets.Max++;
+      if (l.perceivedEffort <= 3) buckets[0]++;
+      else if (l.perceivedEffort <= 5) buckets[1]++;
+      else if (l.perceivedEffort <= 8) buckets[2]++;
+      else buckets[3]++;
     });
-    return Object.entries(buckets).map(([label, value]) => ({ label, value }));
-  }, [filtered]);
+    return [
+      { label: t.common.intensity.easy, value: buckets[0] },
+      { label: t.common.intensity.moderate, value: buckets[1] },
+      { label: t.common.intensity.hard, value: buckets[2] },
+      { label: t.common.intensity.max, value: buckets[3] },
+    ];
+  }, [filtered, t]);
 
   // Personal records
   const prs = useMemo(() => {
@@ -131,6 +138,13 @@ function AnalyticsContent() {
   const totalHours = filtered.reduce((s, l) => s + l.duration, 0);
   const totalDist = filtered.reduce((s, l) => s + l.distance, 0);
 
+  const disciplineFilterLabels: Record<string, string> = {
+    all: t.common.all,
+    swimming: t.common.disciplines.swimming.substring(0, 4),
+    cycling: t.common.disciplines.cycling.substring(0, 4),
+    running: t.common.disciplines.running.substring(0, 4),
+  };
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
@@ -140,7 +154,7 @@ function AnalyticsContent() {
             {(['4w', '8w', '12w', '6m', 'all'] as const).map(r => (
               <button key={r} onClick={() => setRange(r)}
                 className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${range === r ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'}`}>
-                {r === 'all' ? 'All' : r}
+                {r === 'all' ? t.common.all : r}
               </button>
             ))}
           </div>
@@ -148,7 +162,7 @@ function AnalyticsContent() {
             {(['all', 'swimming', 'cycling', 'running'] as const).map(d => (
               <button key={d} onClick={() => setDiscipline(d)}
                 className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors capitalize ${discipline === d ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'}`}>
-                {d === 'all' ? 'All' : d.substring(0, 4)}
+                {disciplineFilterLabels[d]}
               </button>
             ))}
           </div>
@@ -182,7 +196,7 @@ function AnalyticsContent() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
               <h3 className="font-semibold text-gray-900 mb-3">{t.analytics.weeklyVolume}</h3>
-              <BarChart data={weeklyVolume} color="#0EA5E9" height={140} unit="h" />
+              <BarChart data={weeklyVolume} color="#0EA5E9" height={140} unit="h" noDataText={t.analytics.noDataChart} />
             </div>
 
             <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
@@ -202,7 +216,7 @@ function AnalyticsContent() {
                     ))}
                   </div>
                 </div>
-              ) : <p className="text-gray-400 text-sm text-center py-8">No data for selected period</p>}
+              ) : <p className="text-gray-400 text-sm text-center py-8">{t.analytics.noDataPeriod}</p>}
             </div>
           </div>
 
@@ -211,22 +225,22 @@ function AnalyticsContent() {
             {runPaceData.length >= 2 && (
               <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
                 <h3 className="font-semibold text-gray-900 mb-1">🏃 {t.analytics.runningPace}</h3>
-                <p className="text-xs text-gray-500 mb-3">Lower = faster</p>
-                <LineChart data={runPaceData} color={getDisciplineColor('running')} height={130} />
+                <p className="text-xs text-gray-500 mb-3">{t.analytics.lowerFaster}</p>
+                <LineChart data={runPaceData} color={getDisciplineColor('running')} height={130} noDataText={t.analytics.noDataChart} />
               </div>
             )}
 
             {cyclingPowerData.length >= 2 && (
               <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
                 <h3 className="font-semibold text-gray-900 mb-3">🚴 {t.analytics.cyclingPower}</h3>
-                <LineChart data={cyclingPowerData} color={getDisciplineColor('cycling')} height={130} />
+                <LineChart data={cyclingPowerData} color={getDisciplineColor('cycling')} height={130} noDataText={t.analytics.noDataChart} />
               </div>
             )}
 
             {swimDistData.length >= 2 && (
               <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-                <h3 className="font-semibold text-gray-900 mb-3">🏊 Swim Distance per Session (km)</h3>
-                <LineChart data={swimDistData} color={getDisciplineColor('swimming')} height={130} />
+                <h3 className="font-semibold text-gray-900 mb-3">🏊 {t.analytics.swimDistance}</h3>
+                <LineChart data={swimDistData} color={getDisciplineColor('swimming')} height={130} noDataText={t.analytics.noDataChart} />
               </div>
             )}
 
@@ -237,6 +251,7 @@ function AnalyticsContent() {
                   data={effortData}
                   color="#8B5CF6"
                   height={120}
+                  noDataText={t.analytics.noDataChart}
                 />
               </div>
             )}

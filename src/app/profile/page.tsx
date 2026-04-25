@@ -130,7 +130,7 @@ function ProfileContent() {
   const handleSavePrefs = (e: React.FormEvent) => {
     e.preventDefault();
     const total = Number(swimPct) + Number(bikePct) + Number(runPct);
-    if (Math.abs(total - 100) > 2) { alert('Discipline percentages must add up to 100%'); return; }
+    if (Math.abs(total - 100) > 2) { alert(t.profile.training.invalidPercentages); return; }
     savePreferences({
       hoursPerWeek: Number(hours),
       disciplineDistribution: { swim: Number(swimPct) / 100, bike: Number(bikePct) / 100, run: Number(runPct) / 100 },
@@ -143,7 +143,7 @@ function ProfileContent() {
   const handleSaveNutrition = (e: React.FormEvent) => {
     e.preventDefault();
     const total = Number(nProteinPct) + Number(nCarbsPct) + Number(nFatsPct);
-    if (Math.abs(total - 100) > 2) { alert('Macro percentages must add up to 100%'); return; }
+    if (Math.abs(total - 100) > 2) { alert(t.profile.nutrition.invalidMacros); return; }
     saveNutritionTargets({
       dailyCalories: Number(nCalories), proteinPercent: Number(nProteinPct) / 100,
       carbsPercent: Number(nCarbsPct) / 100, fatsPercent: Number(nFatsPct) / 100,

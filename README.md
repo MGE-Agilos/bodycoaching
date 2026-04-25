@@ -14,6 +14,7 @@ A comprehensive triathlon training web application that helps athletes manage th
 - **Analytics** — Trend charts for pace, power, and volume; personal records; intensity distribution
 - **Exercise Library** — Browse 60+ exercises categorised by strength, mobility, and technique; save favourites; add to your plan
 - **Athlete Profile** — Store fitness metrics (FTP, 5K time, heart rate zones); export/import your data as JSON
+- **Multi-language** — Full UI in English 🇬🇧, French 🇫🇷, and Dutch 🇳🇱; preference persists in localStorage
 
 ## Tech Stack
 

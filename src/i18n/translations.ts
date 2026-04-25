@@ -62,6 +62,7 @@ const translations = {
         moderate: 'Moderate',
         hard: 'Hard',
         race: 'Race',
+        max: 'Max',
       },
       status: {
         scheduled: 'Scheduled',
@@ -174,6 +175,7 @@ const translations = {
         elite: '25h (elite)',
         totalShouldBe: '(should be 100%)',
         savePreferences: 'Save Preferences',
+        invalidPercentages: 'Discipline percentages must add up to 100%',
       },
       nutrition: {
         title: 'Daily Nutrition Targets',
@@ -192,6 +194,7 @@ const translations = {
         currentSummary: 'Current targets summary:',
         saveNutrition: 'Save Nutrition Targets',
         mustBe100: '(must be 100%)',
+        invalidMacros: 'Macro percentages must add up to 100%',
       },
       data: {
         exportTitle: 'Export Data',
@@ -298,6 +301,7 @@ const translations = {
       grams: 'g',
       weeklyTrend: 'Weekly Nutrition Trend',
       weeklyCalories: 'Daily calories (last 7 days)',
+      editTargets: 'Edit targets →',
     },
     goals: {
       title: 'Goals',
@@ -358,6 +362,10 @@ const translations = {
       weeklyVolume: 'Weekly Training Volume',
       disciplineBreakdown: 'Discipline Breakdown',
       intensityDistribution: 'Intensity Distribution',
+      swimDistance: 'Swim Distance per Session (km)',
+      lowerFaster: 'Lower = faster',
+      noDataPeriod: 'No data for selected period',
+      noDataChart: 'No data yet',
     },
     exercises: {
       title: 'Exercise Library',
@@ -442,6 +450,7 @@ const translations = {
         moderate: 'Modéré',
         hard: 'Difficile',
         race: 'Course',
+        max: 'Max',
       },
       status: {
         scheduled: 'Planifié',
@@ -554,6 +563,7 @@ const translations = {
         elite: '25h (élite)',
         totalShouldBe: '(doit être 100%)',
         savePreferences: 'Enregistrer les préférences',
+        invalidPercentages: 'Les pourcentages de discipline doivent totaliser 100%',
       },
       nutrition: {
         title: 'Objectifs nutritionnels quotidiens',
@@ -572,6 +582,7 @@ const translations = {
         currentSummary: 'Résumé des objectifs actuels :',
         saveNutrition: 'Enregistrer les objectifs nutritionnels',
         mustBe100: '(doit être 100%)',
+        invalidMacros: 'Les pourcentages de macro doivent totaliser 100%',
       },
       data: {
         exportTitle: 'Exporter les données',
@@ -678,6 +689,7 @@ const translations = {
       grams: 'g',
       weeklyTrend: 'Tendance nutritionnelle hebdomadaire',
       weeklyCalories: 'Calories quotidiennes (7 derniers jours)',
+      editTargets: 'Modifier les objectifs →',
     },
     goals: {
       title: 'Objectifs',
@@ -738,6 +750,10 @@ const translations = {
       weeklyVolume: 'Volume hebdomadaire',
       disciplineBreakdown: 'Répartition par discipline',
       intensityDistribution: 'Distribution des intensités',
+      swimDistance: 'Distance de nage par séance (km)',
+      lowerFaster: 'Plus bas = plus rapide',
+      noDataPeriod: 'Aucune donnée pour cette période',
+      noDataChart: 'Pas encore de données',
     },
     exercises: {
       title: 'Bibliothèque d\'exercices',
@@ -822,6 +838,7 @@ const translations = {
         moderate: 'Matig',
         hard: 'Zwaar',
         race: 'Race',
+        max: 'Max',
       },
       status: {
         scheduled: 'Gepland',
@@ -934,6 +951,7 @@ const translations = {
         elite: '25u (elite)',
         totalShouldBe: '(moet 100% zijn)',
         savePreferences: 'Voorkeuren opslaan',
+        invalidPercentages: 'Discipline percentages moeten optellen tot 100%',
       },
       nutrition: {
         title: 'Dagelijkse voedingsdoelen',
@@ -952,6 +970,7 @@ const translations = {
         currentSummary: 'Samenvatting huidige doelen:',
         saveNutrition: 'Voedingsdoelen opslaan',
         mustBe100: '(moet 100% zijn)',
+        invalidMacros: 'Macro percentages moeten optellen tot 100%',
       },
       data: {
         exportTitle: 'Gegevens exporteren',
@@ -1058,6 +1077,7 @@ const translations = {
       grams: 'g',
       weeklyTrend: 'Wekelijkse voedingstrend',
       weeklyCalories: 'Dagelijkse calorieën (laatste 7 dagen)',
+      editTargets: 'Doelen bewerken →',
     },
     goals: {
       title: 'Doelen',
@@ -1118,6 +1138,10 @@ const translations = {
       weeklyVolume: 'Wekelijks trainingsvolume',
       disciplineBreakdown: 'Verdeling per discipline',
       intensityDistribution: 'Intensiteitsverdeling',
+      swimDistance: 'Zwemafstand per sessie (km)',
+      lowerFaster: 'Lager = sneller',
+      noDataPeriod: 'Geen gegevens voor geselecteerde periode',
+      noDataChart: 'Nog geen gegevens',
     },
     exercises: {
       title: 'Oefeningen bibliotheek',

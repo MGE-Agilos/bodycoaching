@@ -130,7 +130,7 @@ function NutritionContent() {
               <h2 className="font-semibold text-gray-900">{selectedDate === getToday() ? t.common.today : formatDate(selectedDate)}</h2>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-500">{dayMeals.length} {t.nutrition.mealType.toLowerCase()}</span>
-                <Link href="/profile" className="text-xs text-sky-600 hover:underline">Edit targets →</Link>
+                <Link href="/profile" className="text-xs text-sky-600 hover:underline">{t.nutrition.editTargets}</Link>
               </div>
             </div>
             <div className="grid grid-cols-4 gap-2 justify-items-center">

@@ -11,13 +11,14 @@ interface LineChartProps {
   height?: number;
   showLabels?: boolean;
   unit?: string;
+  noDataText?: string;
 }
 
-export function LineChart({ data, color = '#0EA5E9', height = 120, showLabels = true, unit = '' }: LineChartProps) {
+export function LineChart({ data, color = '#0EA5E9', height = 120, showLabels = true, unit = '', noDataText = 'Not enough data yet' }: LineChartProps) {
   if (data.length < 2) {
     return (
       <div className="flex items-center justify-center text-gray-400 text-sm" style={{ height }}>
-        Not enough data yet
+        {noDataText}
       </div>
     );
   }
@@ -99,13 +100,14 @@ interface BarChartProps {
   height?: number;
   showLabels?: boolean;
   unit?: string;
+  noDataText?: string;
 }
 
-export function BarChart({ data, color = '#0EA5E9', height = 120, showLabels = true, unit = '' }: BarChartProps) {
+export function BarChart({ data, color = '#0EA5E9', height = 120, showLabels = true, unit = '', noDataText = 'No data yet' }: BarChartProps) {
   if (data.length === 0) {
     return (
       <div className="flex items-center justify-center text-gray-400 text-sm" style={{ height }}>
-        No data yet
+        {noDataText}
       </div>
     );
   }
@@ -224,7 +226,7 @@ export function CircularProgress({ value, size = 80, strokeWidth = 8, color = '#
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-sm font-bold text-gray-800">{pct}%</span>
+          <span className="text-sm font-bold text-gray-800">{Math.round(pct)}%</span>
         </div>
       </div>
       {label && <span className="text-xs font-medium text-gray-600 text-center">{label}</span>}
