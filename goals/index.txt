@@ -1,0 +1,23 @@
+1:"$Sreact.fragment"
+2:I[7555,[],""]
+3:I[1295,[],""]
+4:I[6874,["874","static/chunks/874-5b0365b56e31b430.js","345","static/chunks/app/not-found-a6b65ea1d5365649.js"],""]
+5:I[894,[],"ClientPageRoot"]
+6:I[8683,["874","static/chunks/874-5b0365b56e31b430.js","489","static/chunks/489-5166f8e7cfce70f6.js","341","static/chunks/app/goals/page-1b1e884eed16eba1.js"],"default"]
+9:I[9665,[],"MetadataBoundary"]
+b:I[9665,[],"OutletBoundary"]
+e:I[4911,[],"AsyncMetadataOutlet"]
+10:I[9665,[],"ViewportBoundary"]
+12:I[6614,[],""]
+:HL["/bodycoaching/_next/static/css/490caae4c3c14f7d.css","style"]
+0:{"P":null,"b":"bP5nJdYHpLqlvaEkyVVqt","p":"/bodycoaching","c":["","goals",""],"i":false,"f":[[["",{"children":["goals",{"children":["__PAGE__",{}]}]},"$undefined","$undefined",true],["",["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/bodycoaching/_next/static/css/490caae4c3c14f7d.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]],["$","html",null,{"lang":"en","children":["$","body",null,{"className":"min-h-screen bg-gray-50 text-gray-900 antialiased","children":["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","div",null,{"className":"min-h-screen bg-slate-50 flex items-center justify-center","children":["$","div",null,{"className":"text-center","children":[["$","div",null,{"className":"text-6xl mb-4","children":"🏊🚴🏃"}],["$","h1",null,{"className":"text-3xl font-bold text-gray-900 mb-2","children":"Page Not Found"}],["$","p",null,{"className":"text-gray-500 mb-6","children":"The page you're looking for doesn't exist."}],["$","$L4",null,{"href":"/","className":"bg-sky-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-sky-700 transition-colors","children":"Go to Dashboard"}]]}]}],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}]}]]}],{"children":["goals",["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":["__PAGE__",["$","$1","c",{"children":[["$","$L5",null,{"Component":"$6","searchParams":{},"params":{},"promises":["$@7","$@8"]}],["$","$L9",null,{"children":"$La"}],null,["$","$Lb",null,{"children":["$Lc","$Ld",["$","$Le",null,{"promise":"$@f"}]]}]]}],{},null,false]},null,false]},null,false],["$","$1","h",{"children":[null,["$","$1","2R34NConX1DsC1rtLklfW",{"children":[["$","$L10",null,{"children":"$L11"}],null]}],null]}],false]],"m":"$undefined","G":["$12","$undefined"],"s":false,"S":true}
+13:"$Sreact.suspense"
+14:I[4911,[],"AsyncMetadata"]
+7:{}
+8:{}
+a:["$","$13",null,{"fallback":null,"children":["$","$L14",null,{"promise":"$@15"}]}]
+d:null
+11:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+c:null
+15:{"metadata":[["$","title","0",{"children":"BodyCoaching — Triathlon Training App"}],["$","meta","1",{"name":"description","content":"Track your triathlon training: workouts, nutrition, goals, and analytics — all offline, stored locally."}]],"error":null,"digest":"$undefined"}
+f:{"metadata":"$15:metadata","error":null,"digest":"$undefined"}
