@@ -101,13 +101,19 @@ All data is stored exclusively in your browser's `localStorage`. Nothing is sent
 The app is deployed to GitHub Pages at:  
 **https://mge-agilos.github.io/bodycoaching/**
 
+Deployment is fully automated via GitHub Actions. Every push to `main` triggers the workflow at `.github/workflows/deploy.yml`, which:
+
+1. Installs dependencies (`npm ci`)
+2. Builds the static export (`npm run build` → `out/`)
+3. Publishes the `out/` directory to GitHub Pages
+
 The `next.config.js` sets `basePath` and `assetPrefix` to `/bodycoaching` for correct asset resolution on GitHub Pages.
 
-To deploy manually after building:
+To build locally:
 
 ```bash
 npm run build
-# Upload the out/ directory to your static host
+# Static output is in the out/ directory
 ```
 
 ## Contributing
