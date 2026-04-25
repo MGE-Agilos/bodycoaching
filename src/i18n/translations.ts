@@ -35,6 +35,7 @@ const translations = {
       thisWeek: 'This week',
       thisMonth: 'This month',
       language: 'Language',
+      optional: 'Optional',
       days: {
         monday: 'Monday',
         tuesday: 'Tuesday',
@@ -339,6 +340,7 @@ const translations = {
       deadline_label: 'Deadline',
       daysLeft: 'days left',
       overdue: 'Overdue',
+      target: 'Target',
     },
     analytics: {
       title: 'Analytics',
@@ -392,6 +394,14 @@ const translations = {
       reps: 'reps',
       duration: 'min',
       addedToPlan: 'Added to today\'s training plan!',
+      suggestedToday: '⚡ Suggested Today',
+      suggestedSubtitle: 'Based on your training preferences',
+      howToPerform: 'How to perform:',
+      setsLabel: 'Sets',
+      repsLabel: 'Reps',
+      durationLabel: 'Duration',
+      exercisesCount: 'exercises',
+      favoritesBtn: 'Favorites',
     },
   },
 
@@ -423,6 +433,7 @@ const translations = {
       thisWeek: 'Cette semaine',
       thisMonth: 'Ce mois-ci',
       language: 'Langue',
+      optional: 'Optionnel',
       days: {
         monday: 'Lundi',
         tuesday: 'Mardi',
@@ -727,6 +738,7 @@ const translations = {
       deadline_label: 'Échéance',
       daysLeft: 'jours restants',
       overdue: 'Dépassé',
+      target: 'Objectif',
     },
     analytics: {
       title: 'Analyses',
@@ -780,6 +792,14 @@ const translations = {
       reps: 'rép.',
       duration: 'min',
       addedToPlan: 'Ajouté au plan d\'entraînement du jour !',
+      suggestedToday: '⚡ Séance suggérée',
+      suggestedSubtitle: 'Basé sur vos préférences d\'entraînement',
+      howToPerform: 'Comment exécuter :',
+      setsLabel: 'Séries',
+      repsLabel: 'Rép.',
+      durationLabel: 'Durée',
+      exercisesCount: 'exercices',
+      favoritesBtn: 'Favoris',
     },
   },
 
@@ -811,6 +831,7 @@ const translations = {
       thisWeek: 'Deze week',
       thisMonth: 'Deze maand',
       language: 'Taal',
+      optional: 'Optioneel',
       days: {
         monday: 'Maandag',
         tuesday: 'Dinsdag',
@@ -1115,6 +1136,7 @@ const translations = {
       deadline_label: 'Deadline',
       daysLeft: 'dagen over',
       overdue: 'Verlopen',
+      target: 'Doel',
     },
     analytics: {
       title: 'Analyses',
@@ -1168,6 +1190,14 @@ const translations = {
       reps: 'herh.',
       duration: 'min',
       addedToPlan: 'Toegevoegd aan het trainingsplan voor vandaag!',
+      suggestedToday: '⚡ Gesuggereerde training',
+      suggestedSubtitle: 'Gebaseerd op uw trainingsvoorkeuren',
+      howToPerform: 'Hoe uitvoeren:',
+      setsLabel: 'Sets',
+      repsLabel: 'Herh.',
+      durationLabel: 'Duur',
+      exercisesCount: 'oefeningen',
+      favoritesBtn: 'Favorieten',
     },
   },
 } as const;

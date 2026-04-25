@@ -111,8 +111,8 @@ function ExercisesContent() {
       <div className="bg-gradient-to-r from-sky-500 to-blue-600 rounded-xl p-4 mb-6 text-white shadow-md">
         <div className="flex items-start justify-between mb-3">
           <div>
-            <h2 className="font-bold text-lg">⚡ Suggested Today</h2>
-            <p className="text-sky-100 text-sm">Based on your training preferences</p>
+            <h2 className="font-bold text-lg">{t.exercises.suggestedToday}</h2>
+            <p className="text-sky-100 text-sm">{t.exercises.suggestedSubtitle}</p>
           </div>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -124,7 +124,7 @@ function ExercisesContent() {
             >
               <p className="text-xl mb-1">{CATEGORY_ICONS[ex.category]}</p>
               <p className="font-medium text-sm leading-tight">{ex.name}</p>
-              <p className="text-sky-200 text-xs mt-0.5 capitalize">{ex.category}</p>
+              <p className="text-sky-200 text-xs mt-0.5">{t.exercises.categories[ex.category as keyof typeof t.exercises.categories] || ex.category}</p>
             </button>
           ))}
         </div>
@@ -154,7 +154,7 @@ function ExercisesContent() {
             {disciplines.map(d => (
               <button key={d} onClick={() => setSelectedDiscipline(d)}
                 className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors capitalize ${selectedDiscipline === d ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'}`}>
-                {d === 'all' ? 'All' : getDisciplineIcon(d) + ' ' + d.substring(0, 4)}
+                {d === 'all' ? t.common.all : getDisciplineIcon(d) + ' ' + d.substring(0, 4)}
               </button>
             ))}
           </div>
@@ -162,9 +162,9 @@ function ExercisesContent() {
             onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${showFavoritesOnly ? 'bg-yellow-50 border-yellow-200 text-yellow-700' : 'bg-white border-gray-200 text-gray-600 hover:border-yellow-200'}`}
           >
-            ⭐ Favorites ({favoriteExercises.length})
+            ⭐ {t.exercises.favoritesBtn} ({favoriteExercises.length})
           </button>
-          <span className="text-xs text-gray-500">{filtered.length} exercises</span>
+          <span className="text-xs text-gray-500">{filtered.length} {t.exercises.exercisesCount}</span>
         </div>
       </div>
 
@@ -188,8 +188,8 @@ function ExercisesContent() {
                     <div>
                       <p className="font-semibold text-gray-900 text-sm leading-tight">{ex.name}</p>
                       <div className="flex items-center gap-1 mt-0.5 flex-wrap">
-                        <span className={`text-xs px-1.5 py-0.5 rounded border capitalize ${CATEGORY_COLORS[ex.category]}`}>{ex.category}</span>
-                        <span className={`text-xs px-1.5 py-0.5 rounded capitalize ${DIFFICULTY_COLOR[ex.difficulty]}`}>{ex.difficulty}</span>
+                        <span className={`text-xs px-1.5 py-0.5 rounded border ${CATEGORY_COLORS[ex.category]}`}>{t.exercises.categories[ex.category as keyof typeof t.exercises.categories] || ex.category}</span>
+                        <span className={`text-xs px-1.5 py-0.5 rounded ${DIFFICULTY_COLOR[ex.difficulty]}`}>{t.exercises.difficulty[ex.difficulty as keyof typeof t.exercises.difficulty] || ex.difficulty}</span>
                       </div>
                     </div>
                   </div>
@@ -204,9 +204,9 @@ function ExercisesContent() {
                 <p className="text-xs text-gray-500 line-clamp-2 mb-2">{ex.description}</p>
 
                 <div className="flex items-center gap-2 flex-wrap text-xs text-gray-400">
-                  {ex.sets && <span>{ex.sets} sets</span>}
+                  {ex.sets && <span>{ex.sets} {t.exercises.sets}</span>}
                   {ex.reps && <span>· {ex.reps}</span>}
-                  {ex.duration && <span>· {ex.duration}min</span>}
+                  {ex.duration && <span>· {ex.duration}{t.exercises.duration}</span>}
                   <span className="ml-auto flex gap-1">
                     {ex.disciplines.map(d => (
                       <span key={d} title={d}>{getDisciplineIcon(d)}</span>
@@ -230,10 +230,10 @@ function ExercisesContent() {
                   <h2 className="text-xl font-bold text-gray-900">{selectedExercise.name}</h2>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`text-xs px-2 py-0.5 rounded-full border capitalize font-medium ${CATEGORY_COLORS[selectedExercise.category]}`}>{selectedExercise.category}</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full capitalize font-medium ${DIFFICULTY_COLOR[selectedExercise.difficulty]}`}>{selectedExercise.difficulty}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${CATEGORY_COLORS[selectedExercise.category]}`}>{t.exercises.categories[selectedExercise.category as keyof typeof t.exercises.categories] || selectedExercise.category}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${DIFFICULTY_COLOR[selectedExercise.difficulty]}`}>{t.exercises.difficulty[selectedExercise.difficulty as keyof typeof t.exercises.difficulty] || selectedExercise.difficulty}</span>
                   {selectedExercise.disciplines.map(d => (
-                    <span key={d} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 capitalize">{getDisciplineIcon(d)} {d}</span>
+                    <span key={d} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">{getDisciplineIcon(d)} {t.common.disciplines[d as keyof typeof t.common.disciplines] || d}</span>
                   ))}
                 </div>
               </div>
@@ -246,27 +246,27 @@ function ExercisesContent() {
             <div className="flex gap-3 mb-4 flex-wrap">
               {selectedExercise.sets && (
                 <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
-                  <p className="text-xs text-gray-500">Sets</p>
+                  <p className="text-xs text-gray-500">{t.exercises.setsLabel}</p>
                   <p className="font-bold text-gray-900">{selectedExercise.sets}</p>
                 </div>
               )}
               {selectedExercise.reps && (
                 <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
-                  <p className="text-xs text-gray-500">Reps</p>
+                  <p className="text-xs text-gray-500">{t.exercises.repsLabel}</p>
                   <p className="font-bold text-gray-900">{selectedExercise.reps}</p>
                 </div>
               )}
               {selectedExercise.duration && (
                 <div className="bg-gray-50 rounded-lg px-3 py-2 text-center">
-                  <p className="text-xs text-gray-500">Duration</p>
-                  <p className="font-bold text-gray-900">{selectedExercise.duration}min</p>
+                  <p className="text-xs text-gray-500">{t.exercises.durationLabel}</p>
+                  <p className="font-bold text-gray-900">{selectedExercise.duration}{t.exercises.duration}</p>
                 </div>
               )}
             </div>
 
             {/* Instructions */}
             <div className="mb-4">
-              <h3 className="font-semibold text-gray-900 mb-2">How to perform:</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t.exercises.howToPerform}</h3>
               <ol className="space-y-2">
                 {selectedExercise.instructions.map((step, i) => (
                   <li key={i} className="flex gap-3 text-sm">

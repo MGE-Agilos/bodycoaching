@@ -1,11 +1,15 @@
+'use client';
+
 import { Goal } from '../types';
 import { formatDate } from '../lib/utils';
+import { useLanguage } from '../context/LanguageContext';
 
 interface GoalProgressBarProps {
   goal: Goal;
 }
 
 export default function GoalProgressBar({ goal }: GoalProgressBarProps) {
+  const { t } = useLanguage();
   const pct = goal.targetValue > 0
     ? Math.min(100, Math.round((goal.currentValue / goal.targetValue) * 100))
     : 0;
@@ -24,14 +28,14 @@ export default function GoalProgressBar({ goal }: GoalProgressBarProps) {
           <span className="text-xl shrink-0">{disciplineEmoji}</span>
           <div className="min-w-0">
             <p className="font-semibold text-gray-900 truncate">{goal.name}</p>
-            <p className="text-xs text-gray-500">{goal.metric} · {goal.category}</p>
+            <p className="text-xs text-gray-500">{goal.metric} · {t.goals.categories[goal.category as keyof typeof t.goals.categories] || goal.category}</p>
           </div>
         </div>
         <div className="text-right shrink-0">
           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
             overdue ? 'bg-red-100 text-red-700' : urgent ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'
           }`}>
-            {overdue ? 'Overdue' : urgent ? `${daysLeft}d left` : formatDate(goal.deadline)}
+            {overdue ? t.goals.overdue : urgent ? `${daysLeft} ${t.goals.daysLeft}` : formatDate(goal.deadline)}
           </span>
         </div>
       </div>

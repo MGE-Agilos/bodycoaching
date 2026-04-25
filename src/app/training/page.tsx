@@ -260,7 +260,7 @@ function TrainingContent() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{t.training.distance}</label>
-                  <input type="number" value={formDistance} onChange={e => setFormDistance(e.target.value)} step="0.1" min="0" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="Optional" />
+                  <input type="number" value={formDistance} onChange={e => setFormDistance(e.target.value)} step="0.1" min="0" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder={t.common.optional} />
                 </div>
               </div>
 

@@ -263,7 +263,7 @@ function WorkoutsContent() {
                     </label>
                     <input type="number" value={fDiscipline === 'cycling' ? fPower : fPace}
                       onChange={e => fDiscipline === 'cycling' ? setFPower(e.target.value) : setFPace(e.target.value)}
-                      step="0.1" min="0" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="Optional" />
+                      step="0.1" min="0" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder={t.common.optional} />
                     {fDiscipline === 'running' && !fPace && fDuration && fDistance && Number(fDistance) > 0 && (
                       <p className="text-xs text-gray-400 mt-0.5">Auto: {(Number(fDuration) / Number(fDistance)).toFixed(1)} min/km</p>
                     )}
@@ -271,7 +271,7 @@ function WorkoutsContent() {
                 ) : <div />}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{t.workouts.heartRate}</label>
-                  <input type="number" value={fHr} onChange={e => setFHr(e.target.value)} min="40" max="230" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="Optional" />
+                  <input type="number" value={fHr} onChange={e => setFHr(e.target.value)} min="40" max="230" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder={t.common.optional} />
                 </div>
               </div>
 
