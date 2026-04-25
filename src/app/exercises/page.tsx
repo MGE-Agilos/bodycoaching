@@ -63,13 +63,20 @@ function ExercisesContent() {
   // Suggest today's workout based on profile and recent activity
   const suggestedExercises = useMemo(() => {
     const prefs = trainingPreferences?.disciplineDistribution;
-    if (!prefs) return EXERCISE_LIBRARY.slice(0, 4);
+    const level = profile?.experienceLevel || 'beginner';
+    if (!prefs) {
+      // No prefs: pick 4 exercises at the user's level
+      const atLevel = EXERCISE_LIBRARY.filter(ex => ex.difficulty === level);
+      return atLevel.length >= 4 ? atLevel.slice(0, 4) : EXERCISE_LIBRARY.slice(0, 4);
+    }
     const topDisc = prefs.swim > prefs.bike && prefs.swim > prefs.run ? 'swimming'
       : prefs.bike > prefs.run ? 'cycling' : 'running';
-    const level = profile?.experienceLevel || 'beginner';
-    return EXERCISE_LIBRARY
-      .filter(ex => ex.disciplines.includes(topDisc as typeof ex.disciplines[0]) && ex.difficulty === level)
-      .slice(0, 4);
+    // Try exact match first, then relax level, then relax discipline
+    const exact = EXERCISE_LIBRARY.filter(ex => ex.disciplines.includes(topDisc as typeof ex.disciplines[0]) && ex.difficulty === level);
+    if (exact.length >= 4) return exact.slice(0, 4);
+    const anyLevel = EXERCISE_LIBRARY.filter(ex => ex.disciplines.includes(topDisc as typeof ex.disciplines[0]));
+    if (anyLevel.length >= 4) return anyLevel.slice(0, 4);
+    return EXERCISE_LIBRARY.filter(ex => ex.difficulty === level).slice(0, 4);
   }, [trainingPreferences, profile]);
 
   const handleAddToTraining = (exercise: Exercise) => {

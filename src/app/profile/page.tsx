@@ -17,9 +17,9 @@ export default function ProfilePage() {
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 function ProfileContent() {
-  const { profile, currentMetrics, trainingPreferences, saveProfile, saveMetrics, savePreferences, exportData, importData, clearAllData } = useApp();
+  const { profile, currentMetrics, trainingPreferences, nutritionTargets, saveProfile, saveMetrics, savePreferences, saveNutritionTargets, exportData, importData, clearAllData } = useApp();
 
-  const [tab, setTab] = useState<'profile' | 'metrics' | 'training' | 'data'>('profile');
+  const [tab, setTab] = useState<'profile' | 'metrics' | 'training' | 'nutrition' | 'data'>('profile');
   const [saved, setSaved] = useState(false);
 
   // Profile form
@@ -43,6 +43,13 @@ function ProfileContent() {
   const [runPct, setRunPct] = useState('30');
   const [trainingDays, setTrainingDays] = useState<string[]>(['Monday', 'Tuesday', 'Thursday', 'Friday', 'Saturday']);
 
+  // Nutrition targets
+  const [nCalories, setNCalories] = useState('2500');
+  const [nProteinPct, setNProteinPct] = useState('25');
+  const [nCarbsPct, setNCarbsPct] = useState('55');
+  const [nFatsPct, setNFatsPct] = useState('20');
+  const [nWater, setNWater] = useState('3');
+
   useEffect(() => {
     if (profile) {
       setName(profile.name); setAge(String(profile.age));
@@ -63,7 +70,14 @@ function ProfileContent() {
       setRunPct(String(Math.round(trainingPreferences.disciplineDistribution.run * 100)));
       setTrainingDays(trainingPreferences.preferredTrainingDays);
     }
-  }, [profile, currentMetrics, trainingPreferences]);
+    if (nutritionTargets) {
+      setNCalories(String(nutritionTargets.dailyCalories));
+      setNProteinPct(String(Math.round(nutritionTargets.proteinPercent * 100)));
+      setNCarbsPct(String(Math.round(nutritionTargets.carbsPercent * 100)));
+      setNFatsPct(String(Math.round(nutritionTargets.fatsPercent * 100)));
+      setNWater(String(nutritionTargets.waterLitersPerDay));
+    }
+  }, [profile, currentMetrics, trainingPreferences, nutritionTargets]);
 
   const notify = () => { setSaved(true); setTimeout(() => setSaved(false), 2000); };
 
@@ -118,6 +132,23 @@ function ProfileContent() {
     notify();
   };
 
+  const handleSaveNutrition = (e: React.FormEvent) => {
+    e.preventDefault();
+    const total = Number(nProteinPct) + Number(nCarbsPct) + Number(nFatsPct);
+    if (Math.abs(total - 100) > 2) {
+      alert('Macro percentages must add up to 100%');
+      return;
+    }
+    saveNutritionTargets({
+      dailyCalories: Number(nCalories),
+      proteinPercent: Number(nProteinPct) / 100,
+      carbsPercent: Number(nCarbsPct) / 100,
+      fatsPercent: Number(nFatsPct) / 100,
+      waterLitersPerDay: Number(nWater),
+    });
+    notify();
+  };
+
   const handleExport = () => {
     const json = exportData();
     const blob = new Blob([json], { type: 'application/json' });
@@ -153,6 +184,7 @@ function ProfileContent() {
     { id: 'profile', label: '👤 Profile' },
     { id: 'metrics', label: '📊 Metrics' },
     { id: 'training', label: '⚙️ Training' },
+    { id: 'nutrition', label: '🥗 Nutrition' },
     { id: 'data', label: '💾 Data' },
   ] as const;
 
@@ -217,6 +249,17 @@ function ProfileContent() {
               ))}
             </div>
           </div>
+
+          {height && weight && (
+            <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-600">
+              <span className="font-medium">BMI: </span>
+              {(() => {
+                const bmi = Number(weight) / Math.pow(Number(height) / 100, 2);
+                const label = bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal' : bmi < 30 ? 'Overweight' : 'Obese';
+                return <span>{bmi.toFixed(1)} — {label}</span>;
+              })()}
+            </div>
+          )}
 
           <button type="submit" className="w-full bg-sky-600 text-white py-2.5 rounded-lg font-medium hover:bg-sky-700 transition-colors">
             Save Profile
@@ -325,6 +368,89 @@ function ProfileContent() {
         </form>
       )}
 
+      {tab === 'nutrition' && (
+        <form onSubmit={handleSaveNutrition} className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm space-y-5">
+          <div>
+            <h2 className="font-semibold text-gray-900">Daily Nutrition Targets</h2>
+            <p className="text-xs text-gray-500 mt-0.5">Set your daily calorie and macro goals. These drive the progress rings on the Nutrition page.</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Daily Calorie Target</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="number" value={nCalories} onChange={e => setNCalories(e.target.value)}
+                min="1200" max="6000" step="50" required
+                className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300"
+              />
+              <span className="text-sm text-gray-500 shrink-0">kcal / day</span>
+            </div>
+            <div className="mt-2 grid grid-cols-3 gap-1">
+              {[2000, 2500, 3000].map(cal => (
+                <button key={cal} type="button" onClick={() => setNCalories(String(cal))}
+                  className={`py-1.5 rounded-lg text-xs font-medium border transition-colors ${Number(nCalories) === cal ? 'bg-sky-600 text-white border-sky-600' : 'bg-white text-gray-600 border-gray-200 hover:border-sky-300'}`}>
+                  {cal} kcal
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Macro Distribution (must equal 100%)</label>
+            <div className="space-y-3">
+              {[
+                { label: '🥩 Protein', val: nProteinPct, set: setNProteinPct, color: 'accent-blue-600', grams: Math.round(Number(nCalories) * Number(nProteinPct) / 100 / 4) },
+                { label: '🌾 Carbohydrates', val: nCarbsPct, set: setNCarbsPct, color: 'accent-emerald-600', grams: Math.round(Number(nCalories) * Number(nCarbsPct) / 100 / 4) },
+                { label: '🥑 Fats', val: nFatsPct, set: setNFatsPct, color: 'accent-violet-600', grams: Math.round(Number(nCalories) * Number(nFatsPct) / 100 / 9) },
+              ].map(({ label, val, set, color, grams }) => (
+                <div key={label}>
+                  <div className="flex items-center gap-3 mb-1">
+                    <span className="text-sm w-36 shrink-0">{label}</span>
+                    <input type="range" min="10" max="70" value={val} onChange={e => set(e.target.value)} className={`flex-1 ${color}`} />
+                    <span className="text-sm font-medium w-10 text-right">{val}%</span>
+                  </div>
+                  <p className="text-xs text-gray-400 pl-36">≈ {grams}g / day at {nCalories} kcal</p>
+                </div>
+              ))}
+              <p className={`text-xs mt-1 font-medium ${Math.abs(Number(nProteinPct) + Number(nCarbsPct) + Number(nFatsPct) - 100) <= 2 ? 'text-green-600' : 'text-red-500'}`}>
+                Total: {Number(nProteinPct) + Number(nCarbsPct) + Number(nFatsPct)}%
+                {Math.abs(Number(nProteinPct) + Number(nCarbsPct) + Number(nFatsPct) - 100) <= 2 ? ' ✓' : ' (must be 100%)'}
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Daily Water Target</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="number" value={nWater} onChange={e => setNWater(e.target.value)}
+                min="1" max="6" step="0.5" required
+                className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300"
+              />
+              <span className="text-sm text-gray-500 shrink-0">liters / day</span>
+            </div>
+            <div className="mt-2 grid grid-cols-4 gap-1">
+              {[2, 2.5, 3, 3.5].map(l => (
+                <button key={l} type="button" onClick={() => setNWater(String(l))}
+                  className={`py-1.5 rounded-lg text-xs font-medium border transition-colors ${Number(nWater) === l ? 'bg-sky-600 text-white border-sky-600' : 'bg-white text-gray-600 border-gray-200 hover:border-sky-300'}`}>
+                  {l}L
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-600 space-y-1">
+            <p className="font-medium text-gray-700">Current targets summary:</p>
+            <p>{nCalories} kcal · {Math.round(Number(nCalories) * Number(nProteinPct) / 100 / 4)}g protein · {Math.round(Number(nCalories) * Number(nCarbsPct) / 100 / 4)}g carbs · {Math.round(Number(nCalories) * Number(nFatsPct) / 100 / 9)}g fat</p>
+            <p>💧 {nWater}L water</p>
+          </div>
+
+          <button type="submit" className="w-full bg-sky-600 text-white py-2.5 rounded-lg font-medium hover:bg-sky-700 transition-colors">
+            Save Nutrition Targets
+          </button>
+        </form>
+      )}
+
       {tab === 'data' && (
         <div className="space-y-4">
           <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
@@ -349,6 +475,22 @@ function ProfileContent() {
             <p className="text-sm text-gray-500 mb-4">Permanently delete all your data. This cannot be undone.</p>
             <button onClick={handleClear} className="w-full bg-red-500 text-white py-2.5 rounded-lg font-medium hover:bg-red-600 transition-colors">
               🗑️ Clear All Data
+            </button>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+            <h2 className="font-semibold text-gray-900 mb-1">Reload Demo Data</h2>
+            <p className="text-sm text-gray-500 mb-4">Reset the app to demo mode with sample athlete data to explore all features.</p>
+            <button
+              onClick={() => {
+                if (confirm('This will replace all your current data with demo data. Continue?')) {
+                  if (typeof window !== 'undefined') localStorage.removeItem('bc_demo_seeded');
+                  window.location.reload();
+                }
+              }}
+              className="w-full bg-violet-500 text-white py-2.5 rounded-lg font-medium hover:bg-violet-600 transition-colors"
+            >
+              🎯 Reload Demo Data
             </button>
           </div>
         </div>

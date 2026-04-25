@@ -4,6 +4,9 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { AthleteProfile, CurrentMetrics, TrainingPreferences, Workout, WorkoutLog, Meal, NutritionTargets, Goal, WaterLog } from '../types';
 import { loadFromStorage, saveToStorage, KEYS } from '../lib/storage';
 import { generateId } from '../lib/utils';
+import { getSeedData } from '../lib/seedData';
+
+const DEMO_KEY = 'bc_demo_seeded';
 
 const DEFAULT_NUTRITION_TARGETS: NutritionTargets = {
   dailyCalories: 2500,
@@ -24,6 +27,7 @@ interface AppContextType {
   nutritionTargets: NutritionTargets;
   goals: Goal[];
   favoriteExercises: string[];
+  isDemoMode: boolean;
 
   saveProfile: (profile: AthleteProfile) => void;
   saveMetrics: (metrics: CurrentMetrics) => void;
@@ -72,18 +76,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [favoriteExercises, setFavoriteExercises] = useState<string[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState(false);
 
   useEffect(() => {
-    setProfile(loadFromStorage<AthleteProfile | null>(KEYS.PROFILE, null));
-    setCurrentMetrics(loadFromStorage<CurrentMetrics | null>(KEYS.METRICS, null));
-    setTrainingPreferences(loadFromStorage<TrainingPreferences | null>(KEYS.PREFERENCES, null));
-    setWorkouts(loadFromStorage<Workout[]>(KEYS.WORKOUTS, []));
-    setWorkoutLogs(loadFromStorage<WorkoutLog[]>(KEYS.WORKOUT_LOGS, []));
-    setMeals(loadFromStorage<Meal[]>(KEYS.MEALS, []));
-    setWaterLogs(loadFromStorage<WaterLog[]>(KEYS.WATER_LOGS, []));
-    setNutritionTargets(loadFromStorage<NutritionTargets>(KEYS.NUTRITION_TARGETS, DEFAULT_NUTRITION_TARGETS));
-    setGoals(loadFromStorage<Goal[]>(KEYS.GOALS, []));
-    setFavoriteExercises(loadFromStorage<string[]>(KEYS.FAVORITE_EXERCISES, []));
+    const alreadySeeded = typeof window !== 'undefined' && localStorage.getItem(DEMO_KEY);
+    if (!alreadySeeded) {
+      const demo = getSeedData();
+      setProfile(demo.profile);
+      setCurrentMetrics(demo.currentMetrics);
+      setTrainingPreferences(demo.trainingPreferences);
+      setWorkouts(demo.workouts);
+      setWorkoutLogs(demo.workoutLogs);
+      setMeals(demo.meals);
+      setWaterLogs(demo.waterLogs);
+      setNutritionTargets(demo.nutritionTargets);
+      setGoals(demo.goals);
+      setFavoriteExercises([]);
+      setIsDemoMode(true);
+      if (typeof window !== 'undefined') localStorage.setItem(DEMO_KEY, '1');
+    } else {
+      setProfile(loadFromStorage<AthleteProfile | null>(KEYS.PROFILE, null));
+      setCurrentMetrics(loadFromStorage<CurrentMetrics | null>(KEYS.METRICS, null));
+      setTrainingPreferences(loadFromStorage<TrainingPreferences | null>(KEYS.PREFERENCES, null));
+      setWorkouts(loadFromStorage<Workout[]>(KEYS.WORKOUTS, []));
+      setWorkoutLogs(loadFromStorage<WorkoutLog[]>(KEYS.WORKOUT_LOGS, []));
+      setMeals(loadFromStorage<Meal[]>(KEYS.MEALS, []));
+      setWaterLogs(loadFromStorage<WaterLog[]>(KEYS.WATER_LOGS, []));
+      setNutritionTargets(loadFromStorage<NutritionTargets>(KEYS.NUTRITION_TARGETS, DEFAULT_NUTRITION_TARGETS));
+      setGoals(loadFromStorage<Goal[]>(KEYS.GOALS, []));
+      setFavoriteExercises(loadFromStorage<string[]>(KEYS.FAVORITE_EXERCISES, []));
+    }
     setLoaded(true);
   }, []);
 
@@ -232,7 +254,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
     <AppContext.Provider value={{
       profile, currentMetrics, trainingPreferences, workouts, workoutLogs,
-      meals, waterLogs, nutritionTargets, goals, favoriteExercises,
+      meals, waterLogs, nutritionTargets, goals, favoriteExercises, isDemoMode,
       saveProfile, saveMetrics, savePreferences,
       addWorkout, updateWorkout, deleteWorkout, addWorkouts, replaceWeekWorkouts,
       addWorkoutLog, updateWorkoutLog, deleteWorkoutLog,

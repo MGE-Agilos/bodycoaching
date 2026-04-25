@@ -5,7 +5,8 @@ import ClientLayout from '../../components/ClientLayout';
 import { useApp } from '../../context/AppContext';
 import { Meal, MealFoodEntry } from '../../types';
 import { FOOD_DATABASE } from '../../data/foods';
-import { getToday, formatDate, generateId } from '../../lib/utils';
+import { getToday, formatDate } from '../../lib/utils';
+import Link from 'next/link';
 import { CircularProgress } from '../../components/SimpleChart';
 
 export default function NutritionPage() {
@@ -128,7 +129,10 @@ function NutritionContent() {
           <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm mb-4">
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-semibold text-gray-900">{selectedDate === getToday() ? "Today's Summary" : formatDate(selectedDate)}</h2>
-              <span className="text-sm text-gray-500">{dayMeals.length} meals</span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">{dayMeals.length} meals</span>
+                <Link href="/profile" className="text-xs text-sky-600 hover:underline">Edit targets →</Link>
+              </div>
             </div>
             <div className="grid grid-cols-4 gap-2 justify-items-center">
               <CircularProgress value={targets.cal > 0 ? (dayTotals.cal / targets.cal) * 100 : 0} color="#F97316" label="Calories" unit="" current={dayTotals.cal} target={targets.cal} />

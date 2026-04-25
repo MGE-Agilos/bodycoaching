@@ -54,10 +54,15 @@ function WorkoutsContent() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Auto-calculate pace for running if not entered but duration and distance are available
+    let autoPace = fPace ? Number(fPace) : undefined;
+    if (!autoPace && fDiscipline === 'running' && Number(fDuration) > 0 && Number(fDistance) > 0) {
+      autoPace = Number(fDuration) / Number(fDistance);
+    }
     const data = {
       discipline: fDiscipline, date: fDate, duration: Number(fDuration),
       distance: fDistance ? Number(fDistance) : 0,
-      averagePace: fPace ? Number(fPace) : undefined,
+      averagePace: fDiscipline !== 'cycling' ? autoPace : undefined,
       averagePower: fPower ? Number(fPower) : undefined,
       averageHeartRate: fHr ? Number(fHr) : undefined,
       perceivedEffort: Number(fEffort), notes: fNotes,
@@ -259,6 +264,11 @@ function WorkoutsContent() {
                     <input type="number" value={fDiscipline === 'cycling' ? fPower : fPace}
                       onChange={e => fDiscipline === 'cycling' ? setFPower(e.target.value) : setFPace(e.target.value)}
                       step="0.1" min="0" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="Optional" />
+                    {fDiscipline === 'running' && !fPace && fDuration && fDistance && Number(fDistance) > 0 && (
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        Auto: {(Number(fDuration) / Number(fDistance)).toFixed(1)} min/km
+                      </p>
+                    )}
                   </div>
                 ) : <div />}
                 <div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import ClientLayout from '../components/ClientLayout';
 import StatCard from '../components/StatCard';
@@ -17,7 +18,8 @@ export default function DashboardPage() {
 }
 
 function Dashboard() {
-  const { profile, workouts, workoutLogs, goals, meals } = useApp();
+  const { profile, workouts, workoutLogs, goals, meals, isDemoMode } = useApp();
+  const [demoBannerDismissed, setDemoBannerDismissed] = useState(false);
 
   const today = getToday();
   const weekStart = toISODate(getWeekStart(new Date()));
@@ -31,6 +33,20 @@ function Dashboard() {
   const monthLogs = workoutLogs.filter(l => l.date >= thisMonthStart);
   const totalMinutes = monthLogs.reduce((s, l) => s + l.duration, 0);
   const totalDistance = monthLogs.reduce((s, l) => s + (l.distance || 0), 0);
+
+  // Calculate training streak (consecutive days with at least one workout logged)
+  const streak = (() => {
+    const logDates = new Set(workoutLogs.map(l => l.date));
+    let count = 0;
+    const d = new Date(today + 'T00:00:00');
+    // If no workout today, still count from yesterday
+    if (!logDates.has(today)) d.setDate(d.getDate() - 1);
+    while (logDates.has(d.toISOString().split('T')[0])) {
+      count++;
+      d.setDate(d.getDate() - 1);
+    }
+    return count;
+  })();
 
   const activeGoals = goals.filter(g => g.status === 'active');
 
@@ -56,6 +72,22 @@ function Dashboard() {
           {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
         </p>
       </div>
+
+      {isDemoMode && !demoBannerDismissed && (
+        <div className="mb-4 bg-violet-50 border border-violet-200 rounded-xl p-3 flex items-start justify-between gap-3">
+          <div className="flex items-start gap-2">
+            <span className="text-lg shrink-0">🎯</span>
+            <div>
+              <p className="font-semibold text-violet-900 text-sm">Demo data loaded — explore all features!</p>
+              <p className="text-xs text-violet-700 mt-0.5">
+                Real workouts, goals, nutrition and analytics are pre-loaded. When ready, go to{' '}
+                <Link href="/profile" className="underline font-medium">Profile → Data</Link> to clear and start fresh.
+              </p>
+            </div>
+          </div>
+          <button onClick={() => setDemoBannerDismissed(true)} className="text-violet-400 hover:text-violet-600 text-lg shrink-0 leading-none">✕</button>
+        </div>
+      )}
 
       {!profile && (
         <div className="mb-6 bg-sky-50 border border-sky-200 rounded-xl p-4 flex items-center justify-between gap-4">
@@ -87,8 +119,8 @@ function Dashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <StatCard label="This Month" value={formatDuration(totalMinutes)} icon="⏱️" subtitle={`${monthLogs.length} sessions`} />
         <StatCard label="Distance" value={totalDistance.toFixed(0)} unit="km" icon="📍" subtitle="this month" />
-        <StatCard label="Week Progress" value={`${completedThisWeek.length}/${weekWorkouts.length}`} icon="✅" subtitle="workouts done" />
-        <StatCard label="Today Calories" value={Math.round(todayCalories)} unit="kcal" icon="🔥" subtitle={`${todayMeals.length} meals logged`} />
+        <StatCard label="Streak" value={streak} unit={streak === 1 ? 'day' : 'days'} icon="🔥" subtitle="consecutive training" />
+        <StatCard label="Today Calories" value={Math.round(todayCalories)} unit="kcal" icon="🥗" subtitle={`${todayMeals.length} meals logged`} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
