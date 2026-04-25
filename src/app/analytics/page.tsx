@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import ClientLayout from '../../components/ClientLayout';
 import { useApp } from '../../context/AppContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { LineChart, BarChart, PieChart } from '../../components/SimpleChart';
 import { formatDuration, getDisciplineColor } from '../../lib/utils';
 
@@ -16,6 +17,7 @@ export default function AnalyticsPage() {
 
 function AnalyticsContent() {
   const { workoutLogs } = useApp();
+  const { t } = useLanguage();
   const [range, setRange] = useState<'4w' | '8w' | '12w' | '6m' | 'all'>('8w');
   const [discipline, setDiscipline] = useState<'all' | 'swimming' | 'cycling' | 'running'>('all');
 
@@ -132,7 +134,7 @@ function AnalyticsContent() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t.analytics.title}</h1>
         <div className="flex gap-2 flex-wrap">
           <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
             {(['4w', '8w', '12w', '6m', 'all'] as const).map(r => (
@@ -156,7 +158,7 @@ function AnalyticsContent() {
       {workoutLogs.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-100 p-16 text-center shadow-sm">
           <div className="text-5xl mb-3">📊</div>
-          <p className="text-gray-500">No workout data yet. Log workouts to see analytics.</p>
+          <p className="text-gray-500">{t.analytics.noData}</p>
         </div>
       ) : (
         <>
@@ -164,27 +166,27 @@ function AnalyticsContent() {
           <div className="grid grid-cols-3 gap-3 mb-6">
             <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm text-center">
               <p className="text-2xl font-bold text-gray-900">{filtered.length}</p>
-              <p className="text-xs text-gray-500 mt-0.5">workouts</p>
+              <p className="text-xs text-gray-500 mt-0.5">{t.analytics.totalSessions}</p>
             </div>
             <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm text-center">
               <p className="text-2xl font-bold text-gray-900">{formatDuration(totalHours)}</p>
-              <p className="text-xs text-gray-500 mt-0.5">training time</p>
+              <p className="text-xs text-gray-500 mt-0.5">{t.analytics.totalTime}</p>
             </div>
             <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm text-center">
               <p className="text-2xl font-bold text-gray-900">{totalDist.toFixed(0)}<span className="text-base font-normal text-gray-500">km</span></p>
-              <p className="text-xs text-gray-500 mt-0.5">total distance</p>
+              <p className="text-xs text-gray-500 mt-0.5">{t.analytics.totalDistance}</p>
             </div>
           </div>
 
           {/* Charts grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-              <h3 className="font-semibold text-gray-900 mb-3">Weekly Training Volume (hours)</h3>
+              <h3 className="font-semibold text-gray-900 mb-3">{t.analytics.weeklyVolume}</h3>
               <BarChart data={weeklyVolume} color="#0EA5E9" height={140} unit="h" />
             </div>
 
             <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-              <h3 className="font-semibold text-gray-900 mb-3">Discipline Distribution</h3>
+              <h3 className="font-semibold text-gray-900 mb-3">{t.analytics.disciplineBreakdown}</h3>
               {discDistribution.length > 0 ? (
                 <div className="flex items-center gap-4">
                   <PieChart data={discDistribution} size={130} />
@@ -208,7 +210,7 @@ function AnalyticsContent() {
           <div className="space-y-4 mb-6">
             {runPaceData.length >= 2 && (
               <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-                <h3 className="font-semibold text-gray-900 mb-1">🏃 Running Pace Trend (min/km)</h3>
+                <h3 className="font-semibold text-gray-900 mb-1">🏃 {t.analytics.runningPace}</h3>
                 <p className="text-xs text-gray-500 mb-3">Lower = faster</p>
                 <LineChart data={runPaceData} color={getDisciplineColor('running')} height={130} />
               </div>
@@ -216,7 +218,7 @@ function AnalyticsContent() {
 
             {cyclingPowerData.length >= 2 && (
               <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-                <h3 className="font-semibold text-gray-900 mb-3">🚴 Cycling Power Trend (W)</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">🚴 {t.analytics.cyclingPower}</h3>
                 <LineChart data={cyclingPowerData} color={getDisciplineColor('cycling')} height={130} />
               </div>
             )}
@@ -230,7 +232,7 @@ function AnalyticsContent() {
 
             {effortData.some(d => d.value > 0) && (
               <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-                <h3 className="font-semibold text-gray-900 mb-3">Perceived Effort Distribution</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">{t.analytics.intensityDistribution}</h3>
                 <BarChart
                   data={effortData}
                   color="#8B5CF6"
@@ -242,17 +244,17 @@ function AnalyticsContent() {
 
           {/* Personal Records */}
           <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-            <h3 className="font-semibold text-gray-900 mb-4">All-Time Personal Records</h3>
+            <h3 className="font-semibold text-gray-900 mb-4">{t.analytics.personalRecords}</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {[
-                { label: 'Total Workouts', value: prs.totalWorkouts, unit: '' },
-                { label: 'Total Training Time', value: formatDuration(prs.totalTime), unit: '' },
-                { label: 'Total Distance', value: prs.totalDistance.toFixed(0), unit: 'km' },
-                prs.bestRunPace ? { label: 'Best Run Pace', value: prs.bestRunPace.toFixed(1), unit: 'min/km' } : null,
-                prs.longestRun ? { label: 'Longest Run', value: prs.longestRun.toFixed(1), unit: 'km' } : null,
-                prs.bestPower ? { label: 'Best Avg Power', value: prs.bestPower, unit: 'W' } : null,
-                prs.longestBike ? { label: 'Longest Ride', value: prs.longestBike.toFixed(1), unit: 'km' } : null,
-                prs.longestSwim ? { label: 'Longest Swim', value: prs.longestSwim.toFixed(1), unit: 'km' } : null,
+                { label: t.analytics.totalSessions, value: prs.totalWorkouts, unit: '' },
+                { label: t.analytics.totalTime, value: formatDuration(prs.totalTime), unit: '' },
+                { label: t.analytics.totalDistance, value: prs.totalDistance.toFixed(0), unit: 'km' },
+                prs.bestRunPace ? { label: t.analytics.runningPace, value: prs.bestRunPace.toFixed(1), unit: 'min/km' } : null,
+                prs.longestRun ? { label: t.analytics.longestRun, value: prs.longestRun.toFixed(1), unit: 'km' } : null,
+                prs.bestPower ? { label: t.analytics.cyclingPower, value: prs.bestPower, unit: 'W' } : null,
+                prs.longestBike ? { label: t.analytics.longestRide, value: prs.longestBike.toFixed(1), unit: 'km' } : null,
+                prs.longestSwim ? { label: t.analytics.longestSwim, value: prs.longestSwim.toFixed(1), unit: 'km' } : null,
               ].filter(Boolean).map((pr, i) => pr && (
                 <div key={i} className="bg-gray-50 rounded-lg p-3">
                   <p className="text-xs text-gray-500">{pr.label}</p>

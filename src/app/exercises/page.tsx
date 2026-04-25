@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import ClientLayout from '../../components/ClientLayout';
 import { useApp } from '../../context/AppContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { EXERCISE_LIBRARY } from '../../data/exercises';
 import { Exercise } from '../../types';
 import { getDisciplineIcon } from '../../lib/utils';
@@ -39,6 +40,7 @@ const DIFFICULTY_COLOR: Record<string, string> = {
 
 function ExercisesContent() {
   const { favoriteExercises, toggleFavoriteExercise, trainingPreferences, profile, addWorkout } = useApp();
+  const { t } = useLanguage();
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedDiscipline, setSelectedDiscipline] = useState<string>('all');
@@ -91,13 +93,13 @@ function ExercisesContent() {
       notes: `Sets: ${exercise.sets || '-'}, Reps: ${exercise.reps || '-'}`,
       status: 'scheduled',
     });
-    setAddedMessage(`"${exercise.name}" added to today's training!`);
+    setAddedMessage(`"${exercise.name}" ${t.exercises.addedToPlan}`);
     setTimeout(() => setAddedMessage(null), 3000);
   };
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Exercise Library</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">{t.exercises.title}</h1>
 
       {addedMessage && (
         <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-2 rounded-lg text-sm font-medium">
@@ -132,7 +134,7 @@ function ExercisesContent() {
       <div className="space-y-3 mb-4">
         <input
           value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-          placeholder="Search exercises..."
+          placeholder={t.exercises.searchPlaceholder}
           className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300"
         />
 
@@ -141,7 +143,7 @@ function ExercisesContent() {
             {categories.map(cat => (
               <button key={cat} onClick={() => setSelectedCategory(cat)}
                 className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors whitespace-nowrap capitalize ${selectedCategory === cat ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'}`}>
-                {cat === 'all' ? 'All' : (CATEGORY_ICONS[cat] || '') + ' ' + cat}
+                {cat === 'all' ? t.exercises.categories.all : (CATEGORY_ICONS[cat] || '') + ' ' + (t.exercises.categories[cat as keyof typeof t.exercises.categories] || cat)}
               </button>
             ))}
           </div>
@@ -170,7 +172,7 @@ function ExercisesContent() {
       {filtered.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-100 p-10 text-center shadow-sm">
           <div className="text-4xl mb-3">🤸</div>
-          <p className="text-gray-500">No exercises found. Try different filters.</p>
+          <p className="text-gray-500">{t.exercises.noResults}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -280,13 +282,13 @@ function ExercisesContent() {
                 onClick={() => toggleFavoriteExercise(selectedExercise.id)}
                 className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors border ${favoriteExercises.includes(selectedExercise.id) ? 'bg-yellow-50 border-yellow-200 text-yellow-700' : 'bg-white border-gray-200 text-gray-600 hover:border-yellow-300'}`}
               >
-                {favoriteExercises.includes(selectedExercise.id) ? '⭐ Favorited' : '☆ Add to Favorites'}
+                {favoriteExercises.includes(selectedExercise.id) ? t.exercises.removeFromFavorites : t.exercises.addToFavorites}
               </button>
               <button
                 onClick={() => { handleAddToTraining(selectedExercise); setSelectedExercise(null); }}
                 className="flex-1 bg-sky-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-sky-700 transition-colors"
               >
-                + Add to Today
+                {t.exercises.addToPlan}
               </button>
             </div>
           </div>

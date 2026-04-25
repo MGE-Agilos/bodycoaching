@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import ClientLayout from '../../components/ClientLayout';
 import { useApp } from '../../context/AppContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { Meal, MealFoodEntry } from '../../types';
 import { FOOD_DATABASE } from '../../data/foods';
 import { getToday, formatDate } from '../../lib/utils';
@@ -33,9 +34,9 @@ function calcMealNutrition(meal: Meal) {
 
 function NutritionContent() {
   const { meals, waterLogs, nutritionTargets, addMeal, deleteMeal, setWaterLog } = useApp();
+  const { t } = useLanguage();
 
   const [selectedDate, setSelectedDate] = useState(getToday());
-  const [showFoodModal, setShowFoodModal] = useState<{ mealId: string } | null>(null);
   const [showAddMeal, setShowAddMeal] = useState(false);
   const [newMealType, setNewMealType] = useState<Meal['mealType']>('breakfast');
   const [foodSearch, setFoodSearch] = useState('');
@@ -69,13 +70,13 @@ function NutritionContent() {
 
   const handleAddMealSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (currentMealFoods.length === 0) { alert('Add at least one food item.'); return; }
+    if (currentMealFoods.length === 0) { alert(t.nutrition.addFood); return; }
     addMeal({ date: selectedDate, mealType: newMealType, foods: currentMealFoods });
     setShowAddMeal(false); setCurrentMealFoods([]); setFoodSearch('');
   };
 
   const handleAddFoodToMeal = () => {
-    if (!selectedFood) { alert('Select a food first.'); return; }
+    if (!selectedFood) { return; }
     const food = FOOD_DATABASE.find(f => f.id === selectedFood);
     if (!food) return;
     setCurrentMealFoods(prev => [...prev, { foodId: selectedFood, quantity: Number(foodQty), unit: food.servingUnit }]);
@@ -94,7 +95,6 @@ function NutritionContent() {
   const MEAL_TYPES: Meal['mealType'][] = ['breakfast', 'lunch', 'dinner', 'snack'];
   const MEAL_ICONS = { breakfast: '🌅', lunch: '☀️', dinner: '🌙', snack: '🍎' };
 
-  // Weekly data for mini-overview
   const last7 = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(selectedDate + 'T00:00:00');
     d.setDate(d.getDate() - (6 - i));
@@ -107,7 +107,7 @@ function NutritionContent() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Nutrition</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t.nutrition.title}</h1>
         <div className="flex items-center gap-2">
           <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)}
             className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" />
@@ -115,37 +115,35 @@ function NutritionContent() {
       </div>
 
       <div className="flex gap-1 bg-gray-100 p-1 rounded-xl mb-6">
-        {(['daily', 'weekly'] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${tab === t ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'}`}>
-            {t === 'daily' ? '📅 Daily Log' : '📊 Weekly Overview'}
+        {(['daily', 'weekly'] as const).map(tabId => (
+          <button key={tabId} onClick={() => setTab(tabId)}
+            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${tab === tabId ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'}`}>
+            {tabId === 'daily' ? `📅 ${t.nutrition.daily}` : `📊 ${t.nutrition.weekly}`}
           </button>
         ))}
       </div>
 
       {tab === 'daily' && (
         <>
-          {/* Nutrition Circles */}
           <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm mb-4">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="font-semibold text-gray-900">{selectedDate === getToday() ? "Today's Summary" : formatDate(selectedDate)}</h2>
+              <h2 className="font-semibold text-gray-900">{selectedDate === getToday() ? t.common.today : formatDate(selectedDate)}</h2>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">{dayMeals.length} meals</span>
+                <span className="text-sm text-gray-500">{dayMeals.length} {t.nutrition.mealType.toLowerCase()}</span>
                 <Link href="/profile" className="text-xs text-sky-600 hover:underline">Edit targets →</Link>
               </div>
             </div>
             <div className="grid grid-cols-4 gap-2 justify-items-center">
-              <CircularProgress value={targets.cal > 0 ? (dayTotals.cal / targets.cal) * 100 : 0} color="#F97316" label="Calories" unit="" current={dayTotals.cal} target={targets.cal} />
-              <CircularProgress value={targets.prot > 0 ? (dayTotals.prot / targets.prot) * 100 : 0} color="#3B82F6" label="Protein" unit="g" current={dayTotals.prot} target={targets.prot} />
-              <CircularProgress value={targets.carbs > 0 ? (dayTotals.carbs / targets.carbs) * 100 : 0} color="#10B981" label="Carbs" unit="g" current={dayTotals.carbs} target={targets.carbs} />
-              <CircularProgress value={targets.fats > 0 ? (dayTotals.fats / targets.fats) * 100 : 0} color="#8B5CF6" label="Fats" unit="g" current={dayTotals.fats} target={targets.fats} />
+              <CircularProgress value={targets.cal > 0 ? (dayTotals.cal / targets.cal) * 100 : 0} color="#F97316" label={t.nutrition.calories} unit="" current={dayTotals.cal} target={targets.cal} />
+              <CircularProgress value={targets.prot > 0 ? (dayTotals.prot / targets.prot) * 100 : 0} color="#3B82F6" label={t.nutrition.protein} unit="g" current={dayTotals.prot} target={targets.prot} />
+              <CircularProgress value={targets.carbs > 0 ? (dayTotals.carbs / targets.carbs) * 100 : 0} color="#10B981" label={t.nutrition.carbs} unit="g" current={dayTotals.carbs} target={targets.carbs} />
+              <CircularProgress value={targets.fats > 0 ? (dayTotals.fats / targets.fats) * 100 : 0} color="#8B5CF6" label={t.nutrition.fats} unit="g" current={dayTotals.fats} target={targets.fats} />
             </div>
           </div>
 
-          {/* Water */}
           <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm mb-4">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="font-semibold text-gray-900">💧 Water Intake</h2>
+              <h2 className="font-semibold text-gray-900">💧 {t.nutrition.waterIntake}</h2>
               <span className="text-sm font-medium text-blue-600">{waterLiters.toFixed(1)}L / {nutritionTargets.waterLitersPerDay}L</span>
             </div>
             <div className="w-full h-3 bg-gray-100 rounded-full mb-2 overflow-hidden">
@@ -159,12 +157,11 @@ function NutritionContent() {
                 </button>
               ))}
               <input type="number" value={waterInput} onChange={e => setWaterInput(e.target.value)} step="0.1" min="0" max="5"
-                placeholder="Custom" className="flex-1 border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-sky-300" />
-              <button onClick={handleWaterAdd} className="bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-blue-600 transition-colors">Add</button>
+                placeholder={t.nutrition.waterPlaceholder} className="flex-1 border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-sky-300" />
+              <button onClick={handleWaterAdd} className="bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-blue-600 transition-colors">{t.nutrition.logWater}</button>
             </div>
           </div>
 
-          {/* Meals */}
           <div className="space-y-3">
             {MEAL_TYPES.map(mealType => {
               const typeMeals = dayMeals.filter(m => m.mealType === mealType);
@@ -179,7 +176,7 @@ function NutritionContent() {
                     <div className="flex items-center gap-2">
                       <span className="text-xl">{MEAL_ICONS[mealType]}</span>
                       <div>
-                        <p className="font-semibold text-gray-900 capitalize">{mealType}</p>
+                        <p className="font-semibold text-gray-900">{t.common.mealTypes[mealType]}</p>
                         {typeMeals.length > 0 && (
                           <p className="text-xs text-gray-500">{typeTotals.cal} kcal · {typeTotals.prot}g P · {typeTotals.carbs}g C · {typeTotals.fats}g F</p>
                         )}
@@ -189,7 +186,7 @@ function NutritionContent() {
                       onClick={() => { setNewMealType(mealType); setCurrentMealFoods([]); setShowAddMeal(true); }}
                       className="bg-sky-50 text-sky-700 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-sky-100 transition-colors"
                     >
-                      + Add food
+                      + {t.nutrition.addFood}
                     </button>
                   </div>
 
@@ -229,7 +226,7 @@ function NutritionContent() {
       {tab === 'weekly' && (
         <div className="space-y-4">
           <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-            <h2 className="font-semibold text-gray-900 mb-4">Last 7 Days — Calories</h2>
+            <h2 className="font-semibold text-gray-900 mb-4">{t.nutrition.weeklyCalories}</h2>
             <div className="space-y-2">
               {last7.map(d => (
                 <div key={d.date} className="flex items-center gap-3">
@@ -244,20 +241,20 @@ function NutritionContent() {
                 </div>
               ))}
             </div>
-            <div className="mt-3 text-xs text-gray-500 text-right">Target: {targets.cal} kcal/day</div>
+            <div className="mt-3 text-xs text-gray-500 text-right">{t.nutrition.targets}: {targets.cal} kcal/day</div>
           </div>
 
           <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-            <h2 className="font-semibold text-gray-900 mb-3">Weekly Averages</h2>
+            <h2 className="font-semibold text-gray-900 mb-3">{t.nutrition.weeklyTrend}</h2>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'Avg Calories', value: Math.round(last7.reduce((s, d) => s + d.cal, 0) / 7), unit: 'kcal', target: targets.cal },
-                { label: 'Water', value: (waterLogs.filter(w => last7.some(d => d.date === w.date)).reduce((s, w) => s + w.liters, 0) / 7).toFixed(1), unit: 'L/day', target: nutritionTargets.waterLitersPerDay },
+                { label: t.nutrition.calories, value: Math.round(last7.reduce((s, d) => s + d.cal, 0) / 7), unit: 'kcal', target: targets.cal },
+                { label: t.nutrition.water, value: (waterLogs.filter(w => last7.some(d => d.date === w.date)).reduce((s, w) => s + w.liters, 0) / 7).toFixed(1), unit: 'L/day', target: nutritionTargets.waterLitersPerDay },
               ].map(({ label, value, unit, target }) => (
                 <div key={label} className="bg-gray-50 rounded-lg p-3">
                   <p className="text-xs text-gray-500">{label}</p>
                   <p className="text-lg font-bold text-gray-900 mt-0.5">{value} <span className="text-sm font-normal text-gray-500">{unit}</span></p>
-                  <p className="text-xs text-gray-400">Target: {target} {unit}</p>
+                  <p className="text-xs text-gray-400">{t.nutrition.targets}: {target} {unit}</p>
                 </div>
               ))}
             </div>
@@ -265,23 +262,24 @@ function NutritionContent() {
         </div>
       )}
 
-      {/* Add Meal Modal */}
       {showAddMeal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" onClick={() => setShowAddMeal(false)}>
           <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-900 capitalize">Add to {newMealType}</h2>
+              <h2 className="text-lg font-bold text-gray-900">{t.nutrition.addMeal} — {t.common.mealTypes[newMealType]}</h2>
               <button onClick={() => setShowAddMeal(false)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
             </div>
 
-            {/* Food Search */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Search Food</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t.nutrition.foodSearch}</label>
               <input
                 value={foodSearch} onChange={e => setFoodSearch(e.target.value)}
-                placeholder="Type to search (e.g. chicken, banana...)"
+                placeholder={t.nutrition.foodSearch}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300"
               />
+              {foodSearch.length >= 2 && filteredFoods.length === 0 && (
+                <p className="text-xs text-gray-400 mt-1">{t.nutrition.noFoodsFound}</p>
+              )}
               {filteredFoods.length > 0 && (
                 <div className="mt-1 border border-gray-200 rounded-lg max-h-40 overflow-y-auto">
                   {filteredFoods.slice(0, 10).map(food => (
@@ -298,22 +296,21 @@ function NutritionContent() {
 
             <div className="flex gap-2 mb-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.nutrition.quantity}</label>
                 <input type="number" value={foodQty} onChange={e => setFoodQty(e.target.value)} min="0.1" step="0.1" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" />
               </div>
               <div className="flex items-end">
                 <button type="button" onClick={handleAddFoodToMeal}
                   disabled={!selectedFood}
                   className="bg-sky-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-sky-700 transition-colors disabled:opacity-40">
-                  Add
+                  {t.nutrition.addSelectedFood}
                 </button>
               </div>
             </div>
 
-            {/* Current foods in this meal */}
             {currentMealFoods.length > 0 && (
               <div className="mb-4 border border-gray-100 rounded-lg overflow-hidden">
-                <p className="text-xs font-medium text-gray-500 px-3 py-2 bg-gray-50">Foods in this meal</p>
+                <p className="text-xs font-medium text-gray-500 px-3 py-2 bg-gray-50">{t.nutrition.mealFoods}</p>
                 {currentMealFoods.map((entry, idx) => {
                   const food = FOOD_DATABASE.find(f => f.id === entry.foodId)!;
                   const cal = Math.round((food.calories * entry.quantity) / food.servingSize);
@@ -333,7 +330,7 @@ function NutritionContent() {
             <form onSubmit={handleAddMealSubmit}>
               <button type="submit" disabled={currentMealFoods.length === 0}
                 className="w-full bg-emerald-500 text-white py-2.5 rounded-lg font-medium hover:bg-emerald-600 transition-colors disabled:opacity-40">
-                Save Meal ({currentMealFoods.length} items)
+                {t.nutrition.saveMeal} ({currentMealFoods.length})
               </button>
             </form>
           </div>

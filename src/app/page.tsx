@@ -6,6 +6,7 @@ import ClientLayout from '../components/ClientLayout';
 import StatCard from '../components/StatCard';
 import GoalProgressBar from '../components/GoalProgressBar';
 import { useApp } from '../context/AppContext';
+import { useLanguage } from '../context/LanguageContext';
 import { getToday, getWeekStart, toISODate, formatDuration, getDisciplineIcon, getDisciplineColor, getDisciplineBg } from '../lib/utils';
 import { FOOD_DATABASE } from '../data/foods';
 
@@ -19,6 +20,7 @@ export default function DashboardPage() {
 
 function Dashboard() {
   const { profile, workouts, workoutLogs, goals, meals, isDemoMode } = useApp();
+  const { t, language } = useLanguage();
   const [demoBannerDismissed, setDemoBannerDismissed] = useState(false);
 
   const today = getToday();
@@ -34,12 +36,10 @@ function Dashboard() {
   const totalMinutes = monthLogs.reduce((s, l) => s + l.duration, 0);
   const totalDistance = monthLogs.reduce((s, l) => s + (l.distance || 0), 0);
 
-  // Calculate training streak (consecutive days with at least one workout logged)
   const streak = (() => {
     const logDates = new Set(workoutLogs.map(l => l.date));
     let count = 0;
     const d = new Date(today + 'T00:00:00');
-    // If no workout today, still count from yesterday
     if (!logDates.has(today)) d.setDate(d.getDate() - 1);
     while (logDates.has(d.toISOString().split('T')[0])) {
       count++;
@@ -60,7 +60,14 @@ function Dashboard() {
   }, 0);
 
   const greetingHour = new Date().getHours();
-  const greeting = greetingHour < 12 ? 'Good morning' : greetingHour < 18 ? 'Good afternoon' : 'Good evening';
+  const greeting = greetingHour < 12 ? t.dashboard.goodMorning : greetingHour < 18 ? t.dashboard.goodAfternoon : t.dashboard.goodEvening;
+
+  const DAY_LABELS = [
+    t.common.days.mon, t.common.days.tue, t.common.days.wed,
+    t.common.days.thu, t.common.days.fri, t.common.days.sat, t.common.days.sun,
+  ];
+
+  const locale = language === 'fr' ? 'fr-FR' : language === 'nl' ? 'nl-NL' : 'en-US';
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
@@ -69,7 +76,7 @@ function Dashboard() {
           {greeting}{profile ? `, ${profile.name.split(' ')[0]}` : ''}! 👋
         </h1>
         <p className="text-gray-500 mt-1">
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+          {new Date().toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric' })}
         </p>
       </div>
 
@@ -78,10 +85,11 @@ function Dashboard() {
           <div className="flex items-start gap-2">
             <span className="text-lg shrink-0">🎯</span>
             <div>
-              <p className="font-semibold text-violet-900 text-sm">Demo data loaded — explore all features!</p>
+              <p className="font-semibold text-violet-900 text-sm">{t.dashboard.demo.title}</p>
               <p className="text-xs text-violet-700 mt-0.5">
-                Real workouts, goals, nutrition and analytics are pre-loaded. When ready, go to{' '}
-                <Link href="/profile" className="underline font-medium">Profile → Data</Link> to clear and start fresh.
+                {t.dashboard.demo.subtitle}{' '}
+                <Link href="/profile" className="underline font-medium">{t.dashboard.demo.profileLink}</Link>{' '}
+                {t.dashboard.demo.subtitleEnd}
               </p>
             </div>
           </div>
@@ -92,11 +100,11 @@ function Dashboard() {
       {!profile && (
         <div className="mb-6 bg-sky-50 border border-sky-200 rounded-xl p-4 flex items-center justify-between gap-4">
           <div>
-            <p className="font-semibold text-sky-900">Welcome to BodyCoaching!</p>
-            <p className="text-sm text-sky-700 mt-0.5">Set up your profile to get personalized training plans.</p>
+            <p className="font-semibold text-sky-900">{t.dashboard.welcome.title}</p>
+            <p className="text-sm text-sky-700 mt-0.5">{t.dashboard.welcome.subtitle}</p>
           </div>
           <Link href="/profile" className="shrink-0 bg-sky-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-sky-700 transition-colors">
-            Get Started
+            {t.dashboard.welcome.cta}
           </Link>
         </div>
       )}
@@ -104,37 +112,37 @@ function Dashboard() {
       <div className="grid grid-cols-3 gap-3 mb-6">
         <Link href="/workouts" className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl p-3 text-center transition-colors shadow-sm">
           <div className="text-2xl">💪</div>
-          <div className="text-xs font-medium mt-1">Log Workout</div>
+          <div className="text-xs font-medium mt-1">{t.dashboard.logWorkout}</div>
         </Link>
         <Link href="/nutrition" className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl p-3 text-center transition-colors shadow-sm">
           <div className="text-2xl">🥗</div>
-          <div className="text-xs font-medium mt-1">Log Meal</div>
+          <div className="text-xs font-medium mt-1">{t.dashboard.logMeal}</div>
         </Link>
         <Link href="/training" className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl p-3 text-center transition-colors shadow-sm">
           <div className="text-2xl">📅</div>
-          <div className="text-xs font-medium mt-1">Training Plan</div>
+          <div className="text-xs font-medium mt-1">{t.dashboard.trainingPlan}</div>
         </Link>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <StatCard label="This Month" value={formatDuration(totalMinutes)} icon="⏱️" subtitle={`${monthLogs.length} sessions`} />
-        <StatCard label="Distance" value={totalDistance.toFixed(0)} unit="km" icon="📍" subtitle="this month" />
-        <StatCard label="Streak" value={streak} unit={streak === 1 ? 'day' : 'days'} icon="🔥" subtitle="consecutive training" />
-        <StatCard label="Today Calories" value={Math.round(todayCalories)} unit="kcal" icon="🥗" subtitle={`${todayMeals.length} meals logged`} />
+        <StatCard label={t.common.thisMonth} value={formatDuration(totalMinutes)} icon="⏱️" subtitle={`${monthLogs.length} ${t.dashboard.sessions}`} />
+        <StatCard label={t.dashboard.distance} value={totalDistance.toFixed(0)} unit="km" icon="📍" subtitle={t.common.thisMonth.toLowerCase()} />
+        <StatCard label={t.dashboard.streak} value={streak} unit={streak === 1 ? t.dashboard.day : t.dashboard.days} icon="🔥" subtitle={t.dashboard.consecutiveTraining} />
+        <StatCard label={t.dashboard.todayCalories} value={Math.round(todayCalories)} unit="kcal" icon="🥗" subtitle={`${todayMeals.length} ${t.dashboard.mealsLogged}`} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-gray-900">Today&apos;s Plan</h2>
-            <Link href="/training" className="text-sm text-sky-600 hover:text-sky-700 font-medium">See week →</Link>
+            <h2 className="text-lg font-bold text-gray-900">{t.dashboard.todayPlan}</h2>
+            <Link href="/training" className="text-sm text-sky-600 hover:text-sky-700 font-medium">{t.dashboard.seeWeek}</Link>
           </div>
           {todayWorkouts.length === 0 ? (
             <div className="bg-white rounded-xl border border-gray-100 p-6 text-center">
               <div className="text-3xl mb-2">🛋️</div>
-              <p className="text-gray-500 text-sm">Rest day — recovery is training too!</p>
+              <p className="text-gray-500 text-sm">{t.dashboard.restDay}</p>
               <Link href="/training" className="inline-block mt-3 text-sm text-sky-600 hover:underline font-medium">
-                Add a workout
+                {t.dashboard.addWorkout}
               </Link>
             </div>
           ) : (
@@ -147,13 +155,13 @@ function Dashboard() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-semibold text-gray-900">{workout.name}</p>
                         <span className={`text-xs px-2 py-0.5 rounded-full border ${getDisciplineBg(workout.discipline)}`}>
-                          {workout.discipline}
+                          {t.common.disciplines[workout.discipline]}
                         </span>
                       </div>
                       <p className="text-sm text-gray-500">
                         {formatDuration(workout.duration)}
                         {workout.targetDistance ? ` · ${workout.targetDistance}km` : ''}
-                        {' · '}<span className="capitalize">{workout.intensity}</span>
+                        {' · '}<span className="capitalize">{t.common.intensity[workout.intensity]}</span>
                       </p>
                     </div>
                     {workout.status === 'completed' && <span className="text-green-500 text-xl shrink-0">✓</span>}
@@ -169,15 +177,15 @@ function Dashboard() {
 
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-gray-900">Active Goals</h2>
-            <Link href="/goals" className="text-sm text-sky-600 hover:text-sky-700 font-medium">Manage →</Link>
+            <h2 className="text-lg font-bold text-gray-900">{t.dashboard.activeGoals}</h2>
+            <Link href="/goals" className="text-sm text-sky-600 hover:text-sky-700 font-medium">{t.dashboard.manageGoals}</Link>
           </div>
           {activeGoals.length === 0 ? (
             <div className="bg-white rounded-xl border border-gray-100 p-6 text-center">
               <div className="text-3xl mb-2">🎯</div>
-              <p className="text-gray-500 text-sm">No active goals yet. Set your first goal!</p>
+              <p className="text-gray-500 text-sm">{t.dashboard.noGoals}</p>
               <Link href="/goals" className="inline-block mt-3 text-sm text-sky-600 hover:underline font-medium">
-                Add a goal
+                {t.dashboard.addGoal}
               </Link>
             </div>
           ) : (
@@ -187,7 +195,7 @@ function Dashboard() {
               ))}
               {activeGoals.length > 3 && (
                 <Link href="/goals" className="block text-center text-sm text-sky-600 hover:underline py-1">
-                  +{activeGoals.length - 3} more goals
+                  +{activeGoals.length - 3} {t.dashboard.moreGoals}
                 </Link>
               )}
             </div>
@@ -198,12 +206,12 @@ function Dashboard() {
       {weekWorkouts.length > 0 && (
         <div className="mt-6">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-gray-900">This Week</h2>
-            <Link href="/training" className="text-sm text-sky-600 hover:text-sky-700 font-medium">Full plan →</Link>
+            <h2 className="text-lg font-bold text-gray-900">{t.common.thisWeek}</h2>
+            <Link href="/training" className="text-sm text-sky-600 hover:text-sky-700 font-medium">{t.dashboard.fullPlan}</Link>
           </div>
           <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
             <div className="grid grid-cols-7 gap-1">
-              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => {
+              {DAY_LABELS.map((day, i) => {
                 const d = new Date(weekStart + 'T00:00:00');
                 d.setDate(d.getDate() + i);
                 const dateStr = toISODate(d);
@@ -227,10 +235,10 @@ function Dashboard() {
               })}
             </div>
             <div className="mt-3 flex items-center gap-4 text-xs text-gray-500 flex-wrap">
-              <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded-full bg-blue-500 inline-block" /> Swim</span>
-              <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded-full bg-emerald-500 inline-block" /> Bike</span>
-              <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded-full bg-orange-500 inline-block" /> Run</span>
-              <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded-full bg-green-500 inline-block" /> Done</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded-full bg-blue-500 inline-block" /> {t.dashboard.weekLegend.swim}</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded-full bg-emerald-500 inline-block" /> {t.dashboard.weekLegend.bike}</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded-full bg-orange-500 inline-block" /> {t.dashboard.weekLegend.run}</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded-full bg-green-500 inline-block" /> {t.dashboard.weekLegend.done}</span>
             </div>
           </div>
         </div>

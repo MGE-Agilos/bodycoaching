@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import ClientLayout from '../../components/ClientLayout';
 import { useApp } from '../../context/AppContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { Workout } from '../../types';
 import { generateWeeklyPlan } from '../../lib/planGenerator';
 import {
@@ -20,12 +21,12 @@ export default function TrainingPage() {
 
 function TrainingContent() {
   const { profile, trainingPreferences, workouts, updateWorkout, deleteWorkout, addWorkout, replaceWeekWorkouts } = useApp();
+  const { t } = useLanguage();
   const [currentWeekStart, setCurrentWeekStart] = useState(() => getWeekStart(new Date()));
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
-  const [showAddForm, setShowAddForm] = useState<string | null>(null); // date string
+  const [showAddForm, setShowAddForm] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
 
-  // Add/edit form state
   const [formName, setFormName] = useState('');
   const [formDiscipline, setFormDiscipline] = useState<'swimming' | 'cycling' | 'running'>('running');
   const [formDuration, setFormDuration] = useState('45');
@@ -49,10 +50,10 @@ function TrainingContent() {
 
   const handleGeneratePlan = () => {
     if (!profile || !trainingPreferences) {
-      alert('Please complete your profile and training preferences first.');
+      alert(t.training.profileRequired);
       return;
     }
-    if (weekWorkouts.length > 0 && !confirm('This will replace existing workouts for this week. Continue?')) return;
+    if (weekWorkouts.length > 0 && !confirm(t.training.replaceConfirm)) return;
     const newWorkouts = generateWeeklyPlan(currentWeekStart, profile, trainingPreferences);
     replaceWeekWorkouts(weekStartStr, newWorkouts);
   };
@@ -61,6 +62,7 @@ function TrainingContent() {
     setShowAddForm(date);
     setFormName(''); setFormDiscipline('running'); setFormDuration('45');
     setFormIntensity('easy'); setFormDistance(''); setFormNotes(''); setFormDesc('');
+    setSelectedWorkout(null);
     setShowModal(true);
   };
 
@@ -91,7 +93,7 @@ function TrainingContent() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('Delete this workout?')) deleteWorkout(id);
+    if (confirm(t.training.deleteConfirm)) deleteWorkout(id);
     setShowModal(false); setSelectedWorkout(null);
   };
 
@@ -105,42 +107,42 @@ function TrainingContent() {
     setShowModal(false); setSelectedWorkout(null);
   };
 
-  const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const DAY_NAMES = [
+    t.common.days.mon, t.common.days.tue, t.common.days.wed,
+    t.common.days.thu, t.common.days.fri, t.common.days.sat, t.common.days.sun,
+  ];
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
-      {/* Header */}
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Training Plan</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t.training.title}</h1>
           <p className="text-gray-500 text-sm mt-0.5">{getWeekLabel(currentWeekStart)}</p>
         </div>
         <button
           onClick={handleGeneratePlan}
           className="bg-sky-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-sky-700 transition-colors flex items-center gap-2"
         >
-          ⚡ Generate Week Plan
+          {t.training.generatePlan}
         </button>
       </div>
 
-      {/* Week Navigation */}
       <div className="flex items-center justify-between bg-white rounded-xl border border-gray-100 p-3 mb-4 shadow-sm">
-        <button onClick={prevWeek} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">← Prev</button>
+        <button onClick={prevWeek} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">←</button>
         <div className="text-center">
           <button onClick={goToCurrentWeek} className="text-sm text-sky-600 hover:underline font-medium">
-            {weekStartStr === toISODate(getWeekStart(new Date())) ? 'Current Week' : 'Go to this week'}
+            {weekStartStr === toISODate(getWeekStart(new Date())) ? t.training.currentWeek : t.training.currentWeek}
           </button>
           <p className="text-xs text-gray-500 mt-0.5">
-            {formatDuration(weekWorkouts.reduce((s, w) => s + w.duration, 0))} total · {completedCount}/{weekWorkouts.length} done
+            {formatDuration(weekWorkouts.reduce((s, w) => s + w.duration, 0))} · {completedCount}/{weekWorkouts.length} {t.training.completed.toLowerCase()}
           </p>
         </div>
-        <button onClick={nextWeek} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">Next →</button>
+        <button onClick={nextWeek} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">→</button>
       </div>
 
-      {/* Week Grid */}
       {!profile && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4 text-sm text-amber-800">
-          💡 Create your profile to enable automatic plan generation.
+          💡 {t.training.profileRequired}
         </div>
       )}
 
@@ -161,7 +163,7 @@ function TrainingContent() {
                 <button
                   onClick={() => openAddForm(dateStr)}
                   className="text-gray-300 hover:text-sky-500 text-lg leading-none transition-colors"
-                  title="Add workout"
+                  title={t.training.addWorkout}
                 >+</button>
               </div>
 
@@ -187,18 +189,16 @@ function TrainingContent() {
         })}
       </div>
 
-      {/* Legend */}
       <div className="mt-4 flex items-center gap-4 text-xs text-gray-500 flex-wrap">
-        <span className="font-medium">Discipline:</span>
-        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-blue-100 border border-blue-200 inline-block" /> Swimming</span>
-        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-emerald-100 border border-emerald-200 inline-block" /> Cycling</span>
-        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-orange-100 border border-orange-200 inline-block" /> Running</span>
+        <span className="font-medium">{t.workouts.discipline}:</span>
+        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-blue-100 border border-blue-200 inline-block" /> {t.common.disciplines.swimming}</span>
+        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-emerald-100 border border-emerald-200 inline-block" /> {t.common.disciplines.cycling}</span>
+        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-orange-100 border border-orange-200 inline-block" /> {t.common.disciplines.running}</span>
       </div>
 
-      {/* Weekly Summary */}
       {weekWorkouts.length > 0 && (
         <div className="mt-4 bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-          <h3 className="font-semibold text-gray-900 mb-3">Week Summary</h3>
+          <h3 className="font-semibold text-gray-900 mb-3">{t.common.thisWeek}</h3>
           <div className="grid grid-cols-3 gap-3 text-center">
             {(['swimming', 'cycling', 'running'] as const).map(disc => {
               const dws = weekWorkouts.filter(w => w.discipline === disc);
@@ -206,84 +206,83 @@ function TrainingContent() {
               return (
                 <div key={disc}>
                   <p className="text-xl">{getDisciplineIcon(disc)}</p>
-                  <p className="font-semibold text-gray-900 text-sm capitalize">{disc}</p>
-                  <p className="text-xs text-gray-500">{dws.length} sessions · {formatDuration(mins)}</p>
+                  <p className="font-semibold text-gray-900 text-sm">{t.common.disciplines[disc]}</p>
+                  <p className="text-xs text-gray-500">{dws.length} · {formatDuration(mins)}</p>
                 </div>
               );
             })}
           </div>
           <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between text-sm">
-            <span className="text-gray-600">Total volume: <strong>{totalHours.toFixed(1)}h</strong></span>
-            <span className="text-gray-600">Completed: <strong className="text-green-600">{completedCount}/{weekWorkouts.length}</strong></span>
+            <span className="text-gray-600">{t.training.totalHours}: <strong>{totalHours.toFixed(1)}h</strong></span>
+            <span className="text-gray-600">{t.training.completed}: <strong className="text-green-600">{completedCount}/{weekWorkouts.length}</strong></span>
           </div>
         </div>
       )}
 
-      {/* Workout Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" onClick={() => setShowModal(false)}>
           <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-900">{selectedWorkout ? 'Edit Workout' : 'Add Workout'}</h2>
+              <h2 className="text-lg font-bold text-gray-900">{selectedWorkout ? t.training.editWorkout : t.training.addWorkoutForm}</h2>
               <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
             </div>
 
             <form onSubmit={handleFormSubmit} className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                <input value={formName} onChange={e => setFormName(e.target.value)} required className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="e.g. Easy Run" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.training.workoutName}</label>
+                <input value={formName} onChange={e => setFormName(e.target.value)} required className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder={t.training.namePlaceholder} />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Discipline</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t.workouts.discipline}</label>
                   <select value={formDiscipline} onChange={e => setFormDiscipline(e.target.value as typeof formDiscipline)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300">
-                    <option value="running">🏃 Running</option>
-                    <option value="cycling">🚴 Cycling</option>
-                    <option value="swimming">🏊 Swimming</option>
+                    <option value="running">🏃 {t.common.disciplines.running}</option>
+                    <option value="cycling">🚴 {t.common.disciplines.cycling}</option>
+                    <option value="swimming">🏊 {t.common.disciplines.swimming}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Intensity</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t.training.intensity}</label>
                   <select value={formIntensity} onChange={e => setFormIntensity(e.target.value as typeof formIntensity)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300">
-                    <option value="easy">Easy</option>
-                    <option value="moderate">Moderate</option>
-                    <option value="hard">Hard</option>
-                    <option value="race">Race</option>
+                    <option value="easy">{t.common.intensity.easy}</option>
+                    <option value="moderate">{t.common.intensity.moderate}</option>
+                    <option value="hard">{t.common.intensity.hard}</option>
+                    <option value="race">{t.common.intensity.race}</option>
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Duration (min)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t.training.duration}</label>
                   <input type="number" value={formDuration} onChange={e => setFormDuration(e.target.value)} required min="5" max="600" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Distance (km, opt.)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t.training.distance}</label>
                   <input type="number" value={formDistance} onChange={e => setFormDistance(e.target.value)} step="0.1" min="0" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="Optional" />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea value={formDesc} onChange={e => setFormDesc(e.target.value)} rows={2} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300 resize-none" placeholder="What's the session about?" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.training.description}</label>
+                <textarea value={formDesc} onChange={e => setFormDesc(e.target.value)} rows={2} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300 resize-none" placeholder={t.training.descPlaceholder} />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                <input value={formNotes} onChange={e => setFormNotes(e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="Personal notes..." />
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.training.notes}</label>
+                <input value={formNotes} onChange={e => setFormNotes(e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300" placeholder="…" />
               </div>
 
               {selectedWorkout && (
                 <div className="flex gap-2 pt-1">
                   <button type="button" onClick={() => handleComplete(selectedWorkout.id)}
                     className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${selectedWorkout.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-green-500 text-white hover:bg-green-600'}`}>
-                    ✓ {selectedWorkout.status === 'completed' ? 'Completed' : 'Mark Done'}
+                    {selectedWorkout.status === 'completed' ? t.common.status.completed : t.training.markComplete}
                   </button>
                   <button type="button" onClick={() => handleSkip(selectedWorkout.id)}
                     className="flex-1 bg-gray-100 text-gray-600 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
-                    Skip
+                    {t.common.status.skipped}
                   </button>
                   <button type="button" onClick={() => handleDelete(selectedWorkout.id)}
                     className="bg-red-100 text-red-600 py-2 px-3 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors">
@@ -293,15 +292,15 @@ function TrainingContent() {
               )}
 
               <div className="flex gap-2 pt-1">
-                <button type="button" onClick={() => setShowModal(false)} className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg font-medium hover:bg-gray-200 transition-colors">Cancel</button>
-                <button type="submit" className="flex-1 bg-sky-600 text-white py-2.5 rounded-lg font-medium hover:bg-sky-700 transition-colors">Save</button>
+                <button type="button" onClick={() => setShowModal(false)} className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg font-medium hover:bg-gray-200 transition-colors">{t.common.cancel}</button>
+                <button type="submit" className="flex-1 bg-sky-600 text-white py-2.5 rounded-lg font-medium hover:bg-sky-700 transition-colors">{t.training.saveWorkout}</button>
               </div>
             </form>
 
             {selectedWorkout && (
               <div className={`mt-3 px-3 py-2 rounded-lg text-xs ${getIntensityColor(selectedWorkout.intensity)}`}>
-                Intensity: <span className="font-medium capitalize">{selectedWorkout.intensity}</span>
-                {selectedWorkout.targetDistance && ` · Target: ${selectedWorkout.targetDistance}km`}
+                {t.training.intensity}: <span className="font-medium">{t.common.intensity[selectedWorkout.intensity]}</span>
+                {selectedWorkout.targetDistance && ` · ${selectedWorkout.targetDistance}km`}
               </div>
             )}
           </div>
